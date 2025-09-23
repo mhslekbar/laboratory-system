@@ -1,0 +1,54 @@
+.filter((payment: PaymentInterface) => {
+                  const paymentDate = new Date(payment.createdAt);
+                
+                  if (day.toString() === "jour") {
+                    const startDate = new Date(selectedDate);
+                    startDate.setDate(1);
+                    const endDate = new Date(selectedDate);
+                    endDate.setDate(31);
+                    // console.log("startDate: ", startDate)
+                    // console.log("endDate: ", endDate)
+                    console.log("paymentDate: ", paymentDate)                    
+                    return paymentDate >= startDate && paymentDate <= endDate;
+                  }
+                
+                  if (month.toString() === "mois") {
+                    const startDate = new Date(selectedDate);
+                    startDate.setDate(1);
+                    startDate.setMonth(0);
+                    const endDate = new Date(selectedDate);
+                    endDate.setDate(31);
+                    endDate.setMonth(11);          
+                    return paymentDate >= startDate && paymentDate <= endDate;
+                  }
+                
+                  const selectedDateFormatted = formatDate(selectedDate.toString());
+                  const paymentDateFormatted = formatDate(paymentDate.toString());
+                  console.log("paymentDate: ", paymentDate)                    
+                  console.log("selectedDate: ", selectedDate)                    
+
+                  return paymentDateFormatted === selectedDateFormatted;
+                })
+                // .filter((payment: PaymentInterface) => {
+                //   let filterDate
+                //   if(day.toString() === "jour") {
+                //     let startDate = new Date(selectedDate);
+                //     startDate.setDate(1);
+                //     let endDate = new Date(selectedDate);
+                //     endDate.setDate(31);
+                //     return new Date(payment.createdAt) >= startDate && new Date(payment.createdAt) <= endDate;
+                //   } 
+                //   if(month.toString() === "mois") {
+                //     let startDate = new Date(selectedDate);
+                //     startDate.setDate(1);
+                //     startDate.setMonth(0);
+                //     let endDate = new Date(selectedDate);
+                //     endDate.setDate(31);
+                //     endDate.setMonth(11);
+                //     return new Date(payment.createdAt) >= startDate && new Date(payment.createdAt) <= endDate;
+                //   } 
+                //   // if(day.toString() !== "jour" && month.toString() !== "mois") {
+                //   //   filterDate = formatDate(payment.createdAt.toString()) === formatDate(selectedDate.toString())
+                //   // }
+                //   return formatDate(payment.createdAt.toString()) === formatDate(selectedDate.toString())
+                // })

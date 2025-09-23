@@ -1,0 +1,454 @@
+:root {
+  /* موجودة عندك */
+  --mainColor: #2563eb;
+  --secondColor: #1abc9c;
+  --redColor: #eb3b5a;
+  --yellowColor: #f1c40f;
+  --yellowLightColor: #ffeaa7;
+
+  /* جديدة – لوحة مختبر الأسنان */
+  --primary: #2563eb; /* أزرق طبي */
+  --primaryDark: #1d4ed8;
+  --secondary: #1abc9c; /* أخضر نعناع */
+  --secondaryDark: #10907e;
+  --success: #10b981; /* نجاح/استلام */
+  --successDark: #0e9f6e;
+  --danger: #eb3b5a; /* أخطاء */
+  --dangerDark: #c0392b;
+  --warning: #f59e0b; /* تحذير/حفر */
+  --warningDark: #d97706;
+  --info: #38bdf8; /* معلومات */
+  --infoDark: #0284c7;
+  --neutral: #2e3a59; /* نصوص داكنة */
+  --neutralDark: #1f2937;
+  --surface: #f5f6fa; /* خلفيات خفيفة */
+  --surfaceDark: #e5e7eb;
+
+  /* ألوان مراحل الحالة (اقتراح) */
+  --stageDesign: #2563eb; /* تصميم */
+  --stageDrill: #f59e0b; /* حفر */
+  --stageColoring: #8b5cf6; /* تلوين */
+  --stageDelivery: #fb923c; /* تسليم */
+  --stageReceived: #10b981; /* استلام */
+}
+
+/* 🎇 الوضع الليلي */
+.dark {
+  --mainColor: #60a5fa; /* أزرق أفتح للداكن */
+  --secondColor: #34d399; /* أخضر فاتح */
+  --redColor: #f87171; /* أحمر فاتح */
+  --yellowColor: #facc15; /* أصفر ذهبي */
+  --yellowLightColor: #fde68a; /* أصفر فاتح */
+
+  --primary: #3b82f6; /* أزرق */
+  --primaryDark: #1e40af;
+  --secondary: #34d399; /* أخضر */
+  --secondaryDark: #059669;
+  --success: #22c55e; /* أخضر نجاح */
+  --successDark: #15803d;
+  --danger: #ef4444; /* أحمر */
+  --dangerDark: #991b1b;
+  --warning: #f59e0b; /* برتقالي */
+  --warningDark: #b45309;
+  --info: #0ea5e9; /* سماوي */
+  --infoDark: #0369a1;
+  --neutral: #f3f4f6; /* نصوص فاتحة */
+  --neutralDark: #9ca3af;
+  --surface: #1f2937; /* خلفية داكنة */
+  --surfaceDark: #111827;
+
+  --stageDesign: #3b82f6; /* أزرق */
+  --stageDrill: #fbbf24; /* برتقالي */
+  --stageColoring: #a78bfa; /* بنفسجي */
+  --stageDelivery: #f97316; /* برتقالي */
+  --stageReceived: #22c55e; /* أخضر */
+}
+
+.input {
+  @apply w-full rounded-xl border p-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white;
+}
+/* ====== أدوات عامة سبق تعريفها عندك… أبقيناها ====== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  body,
+  input,
+  button,
+  select {
+    text-transform: uppercase;
+  }
+  body {
+    background-color: #fff;
+  }
+  /* body { background-color: #dfe6e9; } */
+  @media print {
+    body {
+      background-color: #fff;
+    }
+  }
+
+  /* ====== أنماط عامة قديمة (موجودة عندك) ====== */
+  .btn-main {
+    background-color: var(--mainColor) !important;
+    color: #fff;
+  }
+  .bg-main {
+    background-color: var(--mainColor) !important;
+    color: #fff;
+  }
+  .border-main {
+    border-color: var(--mainColor);
+  }
+  .text-main {
+    color: var(--mainColor);
+  }
+
+  .btn-second {
+    background-color: var(--secondColor);
+    color: #fff;
+  }
+  .bg-second {
+    background-color: var(--secondColor);
+    color: #fff;
+  }
+  .text-second {
+    color: var(--secondColor);
+  }
+
+  .btn-yellow {
+    background-color: var(--yellowColor);
+    color: #fff;
+  }
+  .bg-yellow {
+    background-color: var(--yellowColor);
+    color: #fff;
+  }
+  .text-yellow {
+    color: var(--yellowColor);
+  }
+
+  .btn-yellow-light {
+    background-color: var(--yellowLightColor) !important;
+    color: #fff;
+  }
+  .bg-yellow-light {
+    background-color: var(--yellowLightColor) !important;
+    color: #000;
+  }
+  .text-yellow-light {
+    color: var(--yellowLightColor);
+  }
+
+  .btn-white {
+    background-color: #fff;
+    color: #00b894;
+  }
+  .btn-blue-second {
+    background-color: #2563eb;
+    color: #fff;
+  }
+
+  .text-red {
+    color: var(--redColor);
+  }
+  .bg-red {
+    background-color: var(--redColor);
+    color: #fff;
+    border: var(--redColor);
+  }
+  .btn-red {
+    background-color: var(--redColor);
+    color: #fff;
+  }
+  .btn-red:hover,
+  .btn-red:focus {
+    background-color: var(--redColor);
+    color: #fff;
+    border: var(--redColor);
+  }
+  .text-white {
+    color: #fff !important;
+  }
+
+  /* ====== ألوان جديدة + hover بأنماط موحّدة ====== */
+
+  /* PRIMARY */
+  .bg-primary {
+    background-color: var(--primary);
+    color: #fff;
+  }
+  .text-primary {
+    color: var(--primary);
+  }
+  .border-primary {
+    border-color: var(--primary);
+  }
+  .btn-primary {
+    background-color: var(--primary);
+    color: #fff;
+  }
+  .hover-bg-primary:hover {
+    background-color: var(--primaryDark) !important;
+  }
+  .btn-primary:hover,
+  .btn-primary:focus {
+    background-color: var(--primaryDark);
+  }
+
+  /* SECONDARY */
+  .bg-secondary {
+    background-color: var(--secondary);
+    color: #fff;
+  }
+  .text-secondary {
+    color: var(--secondary);
+  }
+  .border-secondary {
+    border-color: var(--secondary);
+  }
+  .btn-secondary {
+    background-color: var(--secondary);
+    color: #fff;
+  }
+  .hover-bg-secondary:hover {
+    background-color: var(--secondaryDark) !important;
+  }
+  .btn-secondary:hover,
+  .btn-secondary:focus {
+    background-color: var(--secondaryDark);
+  }
+
+  /* SUCCESS */
+  .bg-success {
+    background-color: var(--success);
+    color: #fff;
+  }
+  .text-success {
+    color: var(--success);
+  }
+  .border-success {
+    border-color: var(--success);
+  }
+  .btn-success {
+    background-color: var(--success);
+    color: #fff;
+  }
+  .hover-bg-success:hover {
+    background-color: var(--successDark) !important;
+  }
+  .btn-success:hover,
+  .btn-success:focus {
+    background-color: var(--successDark);
+  }
+
+  /* DANGER */
+  .bg-danger {
+    background-color: var(--danger);
+    color: #fff;
+  }
+  .text-danger {
+    color: var(--danger);
+  }
+  .border-danger {
+    border-color: var(--danger);
+  }
+  .btn-danger {
+    background-color: var(--danger);
+    color: #fff;
+  }
+  .hover-bg-danger:hover {
+    background-color: var(--dangerDark) !important;
+  }
+  .btn-danger:hover,
+  .btn-danger:focus {
+    background-color: var(--dangerDark);
+  }
+
+  /* WARNING */
+  .bg-warning {
+    background-color: var(--warning);
+    color: #111;
+  }
+  .text-warning {
+    color: var(--warning);
+  }
+  .border-warning {
+    border-color: var(--warning);
+  }
+  .btn-warning {
+    background-color: var(--warning);
+    color: #111;
+  }
+  .hover-bg-warning:hover {
+    background-color: var(--warningDark) !important;
+  }
+  .btn-warning:hover,
+  .btn-warning:focus {
+    background-color: var(--warningDark);
+    color: #fff;
+  }
+
+  /* INFO */
+  .bg-info {
+    background-color: var(--info);
+    color: #fff;
+  }
+  .text-info {
+    color: var(--info);
+  }
+  .border-info {
+    border-color: var(--info);
+  }
+  .btn-info {
+    background-color: var(--info);
+    color: #fff;
+  }
+  .hover-bg-info:hover {
+    background-color: var(--infoDark) !important;
+  }
+  .btn-info:hover,
+  .btn-info:focus {
+    background-color: var(--infoDark);
+  }
+
+  /* NEUTRAL */
+  .bg-neutral {
+    background-color: var(--neutral);
+    color: #fff;
+  }
+  .text-neutral {
+    color: var(--neutral);
+  }
+  .border-neutral {
+    border-color: var(--neutral);
+  }
+  .btn-neutral {
+    background-color: var(--neutral);
+    color: #fff;
+  }
+  .hover-bg-neutral:hover {
+    background-color: var(--neutralDark) !important;
+  }
+  .btn-neutral:hover,
+  .btn-neutral:focus {
+    background-color: var(--neutralDark);
+  }
+
+  /* SURFACE (خلفية خفيفة) */
+  .bg-surface {
+    background-color: var(--surface);
+  }
+  .border-surface {
+    border-color: var(--surface);
+  }
+  .hover-bg-surface:hover {
+    background-color: var(--surfaceDark) !important;
+  }
+
+  /* ====== ألوان المراحل (stage badges) ====== */
+  .stage-design {
+    background-color: var(--stageDesign);
+    color: #fff;
+  }
+  .stage-drill {
+    background-color: var(--stageDrill);
+    color: #111;
+  }
+  .stage-coloring {
+    background-color: var(--stageColoring);
+    color: #fff;
+  }
+  .stage-delivery {
+    background-color: var(--stageDelivery);
+    color: #111;
+  }
+  .stage-received {
+    background-color: var(--stageReceived);
+    color: #fff;
+  }
+
+  /* ====== hover utilities عامة للألوان (اختياري) ====== */
+  .hover-text-primary:hover {
+    color: var(--primary) !important;
+  }
+  .hover-text-secondary:hover {
+    color: var(--secondary) !important;
+  }
+  .hover-text-success:hover {
+    color: var(--success) !important;
+  }
+  .hover-text-danger:hover {
+    color: var(--danger) !important;
+  }
+  .hover-text-warning:hover {
+    color: var(--warning) !important;
+  }
+  .hover-text-info:hover {
+    color: var(--info) !important;
+  }
+
+  .hover-border-primary:hover {
+    border-color: var(--primary) !important;
+  }
+  .hover-border-secondary:hover {
+    border-color: var(--secondary) !important;
+  }
+  .hover-border-success:hover {
+    border-color: var(--success) !important;
+  }
+  .hover-border-danger:hover {
+    border-color: var(--danger) !important;
+  }
+  .hover-border-warning:hover {
+    border-color: var(--warning) !important;
+  }
+  .hover-border-info:hover {
+    border-color: var(--info) !important;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .invoice,
+  .invoice * {
+    visibility: visible;
+  }
+  .invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+} */
