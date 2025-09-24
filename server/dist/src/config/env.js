@@ -6,8 +6,8 @@ require("dotenv/config");
 const zod_1 = require("zod");
 const EnvSchema = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(["development", "test", "production"]).default("development"),
-    PORT: zod_1.z.coerce.number().default(3050),
-    MONGO_URL: zod_1.z.string().min(1, "MONGO_URL is required"),
+    PORT: zod_1.z.coerce.number().default(3052),
+    MONGO_URI: zod_1.z.string().min(1, "MONGO_URL is required"),
     JWT_SEC: zod_1.z.string().min(1, "JWT_SEC is required"),
     // Optional:
     JWT_REFRESH_SEC: zod_1.z.string().optional(),

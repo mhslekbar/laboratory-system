@@ -1,0 +1,172 @@
+[{
+  "_id": {
+    "$oid": "68d0c5cbf8c47ebbcf7fc0a5"
+  },
+  "key": "type-3",
+  "name": "type 3",
+  "stages": [
+    {
+      "key": "design",
+      "name": "design",
+      "order": 1,
+      "color": "#004ffa",
+      "_id": {
+        "$oid": "68d0c5cbf8c47ebbcf7fc0a6"
+      }
+    },
+    {
+      "key": "aaa",
+      "name": "aaaa",
+      "order": 2,
+      "color": "#05ffe2",
+      "_id": {
+        "$oid": "68d0c5cbf8c47ebbcf7fc0a7"
+      }
+    },
+    {
+      "key": "bbb",
+      "name": "bbb",
+      "order": 3,
+      "color": "#00852e",
+      "_id": {
+        "$oid": "68d0c5cbf8c47ebbcf7fc0a8"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T03:43:07.413Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:16:36.488Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d0cd2d271384408c7c0158"
+  },
+  "key": "type1",
+  "name": "standard",
+  "stages": [
+    {
+      "key": "design",
+      "name": "design",
+      "order": 1,
+      "color": "#5b86e1",
+      "_id": {
+        "$oid": "68d0cd2d271384408c7c0159"
+      }
+    },
+    {
+      "key": "drill",
+      "name": "drill",
+      "order": 2,
+      "color": "#a108e7",
+      "_id": {
+        "$oid": "68d0cd2d271384408c7c015a"
+      }
+    },
+    {
+      "key": "color",
+      "name": "color",
+      "order": 3,
+      "color": "#eb24b6",
+      "_id": {
+        "$oid": "68d0cd2d271384408c7c015b"
+      }
+    },
+    {
+      "key": "handoff",
+      "name": "handoff",
+      "order": 4,
+      "color": "#a80051",
+      "_id": {
+        "$oid": "68d0cd2d271384408c7c015c"
+      }
+    },
+    {
+      "key": "receive",
+      "name": "receive",
+      "order": 5,
+      "color": "#66ff00",
+      "_id": {
+        "$oid": "68d0cd2d271384408c7c015d"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T04:14:37.783Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:14:47.899Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d0cd57271384408c7c0192"
+  },
+  "key": "typ2",
+  "name": "classic",
+  "stages": [
+    {
+      "key": "design",
+      "name": "design",
+      "order": 1,
+      "color": "#2d2f34",
+      "_id": {
+        "$oid": "68d0cd57271384408c7c0193"
+      }
+    },
+    {
+      "key": "handoff",
+      "name": "handoff",
+      "order": 2,
+      "color": "#a80051",
+      "_id": {
+        "$oid": "68d0cd57271384408c7c0194"
+      }
+    },
+    {
+      "key": "receive",
+      "name": "receive",
+      "order": 3,
+      "color": "#66ff00",
+      "_id": {
+        "$oid": "68d0cd57271384408c7c0195"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T04:15:19.598Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:15:19.598Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d1b493a378d3e967f8f176"
+  },
+  "key": "aaaaaa",
+  "name": "aaaaaaaa",
+  "stages": [
+    {
+      "key": "zzz",
+      "name": "zzzz",
+      "order": 1,
+      "color": "#002470",
+      "_id": {
+        "$oid": "68d1b493a378d3e967f8f177"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T20:41:55.806Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T20:41:55.806Z"
+  },
+  "__v": 0
+}]

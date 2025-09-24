@@ -1,0 +1,37 @@
+[{
+  "_id": {
+    "$oid": "68cedbb208d0e16b3ea28445"
+  },
+  "branding": {
+    "theme": {
+      "primaryColor": "#4f46e5",
+      "mode": "dark"
+    },
+    "printHeaderHTML": "",
+    "printFooterHTML": ""
+  },
+  "company": {
+    "name": "MEDE PRAT LAB",
+    "legalName": "DENTAL LAB SARL",
+    "taxId": "4738478782",
+    "address": "tvz",
+    "phone": "27077968",
+    "email": "BARA@GMAIL.COM",
+    "website": "WWW.dental-lab.com",
+    "logoUrl": "uploads/logos/mfurfuxd-f9ft5z.jpg",
+    "faviconUrl": "uploads/favicons/mfurjrdw-ry7yjk.png"
+  },
+  "localization": {
+    "defaultLanguage": "fr",
+    "timezone": "Africa/Nouakchott",
+    "defaultCurrency": "MRU",
+    "dateFormat": "DD/MM/YYYY",
+    "numberFormat": "1 234,56"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T22:35:41.625Z"
+  },
+  "updatedBy": {
+    "$oid": "68c9af878ed58c1ca54d2caf"
+  }
+}]

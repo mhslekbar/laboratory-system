@@ -2,8 +2,8 @@
 import express from "express";
 import path from "path";
 // ⬇️ use Express’ built-ins instead of body-parser
-import { connectDB, closeDB } from "./config/db";
-import { securityMiddlewares } from "../middlewares/security";
+import { closeDB, connectDB } from "./config/db";
+import { corsPreflight, securityMiddlewares } from "../middlewares/security";
 import { requestId, morganLogger } from "../middlewares/requestId";
 import { notFound, errorHandler } from "../middlewares/error";
 
@@ -37,7 +37,10 @@ export async function buildApp() {
   app.use(requestId);
   app.use(morganLogger);
 
-  // Security stack (helmet, cors, sanitize, hpp, limiter, compression)
+  // ✅ Répond aux OPTIONS (preflight) avant le reste
+  app.options("*", corsPreflight);
+
+  // Pile de sécu (inclut CORS principal)
   app.use(...securityMiddlewares());
 
   app.use(ExpressMongoSanitize());

@@ -5,7 +5,7 @@ import { z } from "zod";
 const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(3052),
-  MONGO_URL: z.string().min(1, "MONGO_URL is required"),
+  MONGO_URI: z.string().min(1, "MONGO_URL is required"),
   JWT_SEC: z.string().min(1, "JWT_SEC is required"),
   // Optional:
   JWT_REFRESH_SEC: z.string().optional(),

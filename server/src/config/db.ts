@@ -1,39 +1,36 @@
+// server/src/config/db.ts (TypeScript) or .js equivalent
 import mongoose from "mongoose";
 import { env } from "./env";
 
-export async function connectDB() {
-  mongoose.set("strictQuery", true);
+export const connectDB = async () => {
+  const uri = env.MONGO_URI;
+  const isSrv = uri?.startsWith("mongodb+srv://");
 
-  // Register listeners BEFORE connecting
-  mongoose.connection.on("connected", () => {
-    console.log(`✅ Mongo connected`); //: ${env.MONGO_URL}
-  });
-  mongoose.connection.on("error", (err) => {
-    console.error("❌ Mongo error:", err?.message || err);
-  });
-  mongoose.connection.on("disconnected", () => {
-    console.warn("⚠️ Mongo disconnected");
-  });
+  const opts: mongoose.ConnectOptions = {
+    // Good defaults
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 10000,
+    // Only use directConnection for non-SRV (mongodb://host:port)
+    ...(isSrv ? {} : { directConnection: true }),
+  };
 
   try {
-    await mongoose.connect(env.MONGO_URL, {
-      autoIndex: env.NODE_ENV !== "production",
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000,
-      // helpful for localhost single node:
-      directConnection: true,
-    } as any);
-
-    // Fallback log in case the event fired too early in some environments
-    if (mongoose.connection.readyState === 1) {
-      console.log("✅ Mongo connected (await)");
-    }
-  } catch (err: any) {
-    console.error("❌ Initial Mongo connect failed:", err?.message || err);
-    throw err;
+    await mongoose.connect(uri, opts);
+    console.log("✅ Mongo connected");
+  } catch (e: any) {
+    console.error("❌ Initial Mongo connect failed:", e?.message || e);
+    throw e;
   }
-}
 
-export async function closeDB() {
-  await mongoose.connection.close();
-}
+  mongoose.connection.on("disconnected", () => console.warn("⚠️ Mongo disconnected"));
+  mongoose.connection.on("error", (err) => console.error("❌ Mongo error:", err?.message || err));
+};
+
+export const closeDB = async () => {
+  try {
+    await mongoose.connection.close();
+    console.log("🔌 Mongo connection closed");
+  } catch (err: any) {
+    console.error("❌ Error closing Mongo connection:", err?.message || err);
+  }
+};

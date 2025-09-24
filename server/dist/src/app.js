@@ -36,7 +36,9 @@ async function buildApp() {
     app.set("trust proxy", 1);
     app.use(requestId_1.requestId);
     app.use(requestId_1.morganLogger);
-    // Security stack (helmet, cors, sanitize, hpp, limiter, compression)
+    // ✅ Répond aux OPTIONS (preflight) avant le reste
+    app.options("*", security_1.corsPreflight);
+    // Pile de sécu (inclut CORS principal)
     app.use(...(0, security_1.securityMiddlewares)());
     app.use((0, express_mongo_sanitize_1.default)());
     // Parsers (limits as needed)

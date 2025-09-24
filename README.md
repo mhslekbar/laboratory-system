@@ -3,14 +3,14 @@
 # TO INSTALL THIS APP ON VPS SERVER 
 `
 
-  1 - git clone https://github.com/mhslekbar/medepratlab.git
+  1 - git clone https://github.com/mhslekbar/laboratory-system.git
   2 - install all dependency
     => in backend
     1 / apt install nodejs
     2 / npm install -g ts-node
     3 / npm i 
     tsc => to convert ts to js
-    4 / pm2 start --name medepratlab app.js
+    4 / pm2 start --name lab-sys app.js
     5 / pm2 startup ubuntu
     6 / pm2 status
 
@@ -19,7 +19,7 @@
     => ln -s /etc/nginx/sites-available/medepratlab /etc/nginx/sites-enabled/medepratlab
     => 
     server {
-      listen 98;
+      listen 101;
       server_name medepratlab.com www.medepratlab.com;
       location / {
         root /var/www/medepratlab/client;
@@ -31,19 +31,28 @@
         proxy_cache_bypass $http_upgrade;
         try_files $uri $uri/ /index.html;
       }
+
+      listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/medepratlab.com/fullchain.pem; # managed b>    ssl_certificate_key /etc/letsencrypt/live/medepratlab.com/privkey.pem; # managed>    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
   }
 
   server {
-    listen 98;
+    listen 101;
     server_name api.medepratlab.com;
     location /api {
-      proxy_pass http://46.202.132.36:3050;
+      proxy_pass http://46.202.132.36:3052;
       proxy_http_version 1.1;
       proxy_set_header Upgrade $http_upgrade;
       proxy_set_header Connection 'upgrade';
       proxy_set_header Host $host;
       proxy_cache_bypass $http_upgrade;
     }
+
+     listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/medepratlab.com/fullchain.pem; # managed b>    ssl_certificate_key /etc/letsencrypt/live/medepratlab.com/privkey.pem; # managed>    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
   }
   
   

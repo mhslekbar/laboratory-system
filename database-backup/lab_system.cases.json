@@ -1,0 +1,478 @@
+[{
+  "_id": {
+    "$oid": "68d0ccd2271384408c7c0141"
+  },
+  "code": "JOB-000001",
+  "doctor": {
+    "$oid": "68cb71ea7461e8235a7a3809"
+  },
+  "patient": {
+    "$oid": "68ce2ffb0d37d2b124a8660c"
+  },
+  "type": {
+    "$oid": "68d0c5cbf8c47ebbcf7fc0a5"
+  },
+  "note": "mklmklnmklnklk",
+  "currentStageOrder": 3,
+  "stages": [
+    {
+      "stage": {
+        "$oid": "68d0c5cbf8c47ebbcf7fc0a6"
+      },
+      "status": "done",
+      "startedAt": {
+        "$date": "2025-09-22T04:15:43.588Z"
+      },
+      "completedAt": {
+        "$date": "2025-09-22T04:15:44.153Z"
+      }
+    },
+    {
+      "stage": {
+        "$oid": "68d0c5cbf8c47ebbcf7fc0a7"
+      },
+      "status": "done",
+      "startedAt": {
+        "$date": "2025-09-22T04:15:44.153Z"
+      },
+      "completedAt": {
+        "$date": "2025-09-22T04:15:44.651Z"
+      }
+    },
+    {
+      "stage": {
+        "$oid": "68d0c5cbf8c47ebbcf7fc0a8"
+      },
+      "status": "done",
+      "startedAt": {
+        "$date": "2025-09-22T04:15:44.651Z"
+      },
+      "completedAt": {
+        "$date": "2025-09-22T04:15:49.103Z"
+      }
+    }
+  ],
+  "attachments": [],
+  "delivery": {
+    "status": "delivered",
+    "date": {
+      "$date": "2025-09-22T04:15:44.651Z"
+    }
+  },
+  "caseApproval": {
+    "approved": true,
+    "at": {
+      "$date": "2025-09-22T04:15:49.221Z"
+    },
+    "by": {
+      "$oid": "68ce361a0d37d2b124a88ab6"
+    }
+  },
+  "auditTrail": [
+    {
+      "actorRole": "LAB",
+      "action": "create",
+      "meta": {
+        "code": "JOB-000001"
+      },
+      "at": {
+        "$date": "2025-09-22T04:13:06.357Z"
+      },
+      "_id": {
+        "$oid": "68d0ccd2271384408c7c0142"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 0,
+        "to": 1,
+        "by": {
+          "type": "order",
+          "value": 1
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:15:43.588Z"
+      },
+      "_id": {
+        "$oid": "68d0cd6f271384408c7c01ec"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 1,
+        "to": 2,
+        "by": {
+          "type": "order",
+          "value": 2
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:15:44.153Z"
+      },
+      "_id": {
+        "$oid": "68d0cd70271384408c7c01f9"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 2,
+        "to": 3,
+        "by": {
+          "type": "order",
+          "value": 3
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:15:44.651Z"
+      },
+      "_id": {
+        "$oid": "68d0cd70271384408c7c0207"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 3,
+        "to": 3,
+        "by": {
+          "type": "order",
+          "value": 3
+        },
+        "statusOverride": "done"
+      },
+      "at": {
+        "$date": "2025-09-22T04:15:49.103Z"
+      },
+      "_id": {
+        "$oid": "68d0cd75271384408c7c0216"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "approve",
+      "meta": {
+        "approved": true,
+        "by": "68ce361a0d37d2b124a88ab6"
+      },
+      "at": {
+        "$date": "2025-09-22T04:15:49.221Z"
+      },
+      "_id": {
+        "$oid": "68d0cd75271384408c7c0224"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T04:13:06.371Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:15:49.222Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d0ce31271384408c7c0276"
+  },
+  "code": "JOB-000002",
+  "doctor": {
+    "$oid": "68cb71ea7461e8235a7a3809"
+  },
+  "patient": {
+    "$oid": "68cb72207461e8235a7a3842"
+  },
+  "type": {
+    "$oid": "68d0cd57271384408c7c0192"
+  },
+  "note": "ajouter sdklnsdjknfjksd kdnjksndfjks\nds;nfs;njksd\nnmkjdsnkj",
+  "currentStageOrder": 0,
+  "stages": [
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0193"
+      },
+      "status": "pending"
+    },
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0194"
+      },
+      "status": "pending"
+    },
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0195"
+      },
+      "status": "pending"
+    }
+  ],
+  "attachments": [],
+  "delivery": {
+    "status": "pending"
+  },
+  "caseApproval": {
+    "approved": false
+  },
+  "auditTrail": [
+    {
+      "actorRole": "LAB",
+      "action": "create",
+      "meta": {
+        "code": "JOB-000002"
+      },
+      "at": {
+        "$date": "2025-09-22T04:18:57.625Z"
+      },
+      "_id": {
+        "$oid": "68d0ce31271384408c7c0277"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T04:18:57.630Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:18:57.630Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d0cea7271384408c7c0286"
+  },
+  "code": "JOB-000003",
+  "doctor": {
+    "$oid": "68cb71ea7461e8235a7a3809"
+  },
+  "patient": {
+    "$oid": "68ce2ffb0d37d2b124a8660c"
+  },
+  "type": {
+    "$oid": "68d0cd57271384408c7c0192"
+  },
+  "note": "travail ksaljkjkls asnjknjkas\ndmjskndjksnkjdna\nndkjsnjknkdjasnkj",
+  "currentStageOrder": 1,
+  "stages": [
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0193"
+      },
+      "status": "in_progress",
+      "startedAt": {
+        "$date": "2025-09-22T04:33:34.332Z"
+      }
+    },
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0194"
+      },
+      "status": "pending"
+    },
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0195"
+      },
+      "status": "pending"
+    }
+  ],
+  "attachments": [],
+  "delivery": {
+    "status": "pending"
+  },
+  "caseApproval": {
+    "approved": false
+  },
+  "auditTrail": [
+    {
+      "actorRole": "LAB",
+      "action": "create",
+      "meta": {
+        "code": "JOB-000003"
+      },
+      "at": {
+        "$date": "2025-09-22T04:20:55.418Z"
+      },
+      "_id": {
+        "$oid": "68d0cea7271384408c7c0287"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 0,
+        "to": 1,
+        "by": {
+          "type": "order",
+          "value": 1
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:33:34.332Z"
+      },
+      "_id": {
+        "$oid": "68d0d19e271384408c7c0426"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T04:20:55.422Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:33:34.333Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d0ceba271384408c7c0296"
+  },
+  "code": "JOB-000004",
+  "doctor": {
+    "$oid": "68cb5503ed10320fa4254433"
+  },
+  "patient": {
+    "$oid": "68caef3a513ce67622ac85b8"
+  },
+  "type": {
+    "$oid": "68d0cd57271384408c7c0192"
+  },
+  "note": "mklmcklsmckls\ncmsdklcnmsdklncklsd\ncmsdjklcnsdjkn",
+  "currentStageOrder": 3,
+  "stages": [
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0193"
+      },
+      "status": "done",
+      "startedAt": {
+        "$date": "2025-09-22T04:24:00.968Z"
+      },
+      "completedAt": {
+        "$date": "2025-09-22T04:24:02.768Z"
+      }
+    },
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0194"
+      },
+      "status": "done",
+      "startedAt": {
+        "$date": "2025-09-22T04:24:02.768Z"
+      },
+      "completedAt": {
+        "$date": "2025-09-22T04:24:05.074Z"
+      }
+    },
+    {
+      "stage": {
+        "$oid": "68d0cd57271384408c7c0195"
+      },
+      "status": "in_progress",
+      "startedAt": {
+        "$date": "2025-09-22T04:24:05.074Z"
+      }
+    }
+  ],
+  "attachments": [],
+  "delivery": {
+    "status": "delivered",
+    "date": {
+      "$date": "2025-09-22T04:24:05.074Z"
+    }
+  },
+  "caseApproval": {
+    "approved": false
+  },
+  "auditTrail": [
+    {
+      "actorRole": "LAB",
+      "action": "create",
+      "meta": {
+        "code": "JOB-000004"
+      },
+      "at": {
+        "$date": "2025-09-22T04:21:14.333Z"
+      },
+      "_id": {
+        "$oid": "68d0ceba271384408c7c0297"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 0,
+        "to": 1,
+        "by": {
+          "type": "order",
+          "value": 1
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:24:00.968Z"
+      },
+      "_id": {
+        "$oid": "68d0cf60271384408c7c02f0"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 1,
+        "to": 2,
+        "by": {
+          "type": "order",
+          "value": 2
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:24:02.768Z"
+      },
+      "_id": {
+        "$oid": "68d0cf62271384408c7c02fd"
+      }
+    },
+    {
+      "actorRole": "LAB",
+      "action": "advance",
+      "meta": {
+        "from": 2,
+        "to": 3,
+        "by": {
+          "type": "order",
+          "value": 3
+        },
+        "statusOverride": "in_progress"
+      },
+      "at": {
+        "$date": "2025-09-22T04:24:05.074Z"
+      },
+      "_id": {
+        "$oid": "68d0cf65271384408c7c030b"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T04:21:14.337Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T04:24:05.075Z"
+  },
+  "__v": 0
+}]

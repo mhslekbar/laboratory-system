@@ -4,7 +4,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 const port = "3052";
 export const companyName: any = "lab_system";
 export const hostName = `http://localhost:${port}/`;
-// export const hostName = `https://medepratlab.com:${port}/`;
+// export const hostName = `https://api.medepratlab.com/`;
 
 const BASE_URL = `${hostName}api/`;
 
@@ -48,7 +48,7 @@ auth.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = UserData()?.accessToken;
   if (token) {
     config.headers = config.headers ?? {};
-    (config.headers as any).authorization = `Bearer ${token}`;
+    (config.headers as any).Authorization = `Bearer ${token}`;
   }
   (config.headers as any)["Cache-Control"] = "no-cache";
   return config;
@@ -85,7 +85,7 @@ auth.interceptors.response.use(
         if (!newToken) throw new Error("No new token");
         // re-attach header and retry
         original.headers = original.headers ?? {};
-        (original.headers as any).authorization = `Bearer ${newToken}`;
+        (original.headers as any).Authorization = `Bearer ${newToken}`;
         return axios(original);
       } catch (e) {
         // optional: clear local storage on hard failure
@@ -97,6 +97,7 @@ auth.interceptors.response.use(
 );
 
 /* ------------------------- export API helpers ------------------------ */
+
 export const privateRequest = async (method: TypeMethod, url: string, data?: object) => {
   try {
     const response = await auth({ method, url, data });
@@ -113,7 +114,7 @@ export const customPrivateRequest = async (method: TypeMethod, url: string, data
       url: `${BASE_URL}${url}`,
       data,
       headers: {
-        authorization: `Bearer public`,
+        Authorization: `Bearer public`,
         "Cache-Control": "no-cache",
       },
       withCredentials: true,

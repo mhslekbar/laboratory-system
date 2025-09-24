@@ -1,0 +1,208 @@
+[{
+  "_id": {
+    "$oid": "68c9af878ed58c1ca54d2caf"
+  },
+  "name": "mohamed salem",
+  "username": "mhslekbar",
+  "username_lc": "mhslekbar",
+  "passwordHash": "$2b$10$0FOYh4hL8HJG12kH792/su7u1fOTIHj2We8ZLmPfJeupayxRlVzs6",
+  "active": true,
+  "email": "mhslekbar@gmail.com",
+  "phone": "36138613",
+  "roles": [
+    {
+      "$oid": "68ca15d710a0a35827bb3a2a"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-16T18:42:15.960Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-17T16:47:21.181Z"
+  },
+  "__v": 0,
+  "dev": true
+},
+{
+  "_id": {
+    "$oid": "68cb5503ed10320fa4254433"
+  },
+  "fullName": "bara rabata",
+  "username": "bara",
+  "username_lc": "bara",
+  "passwordHash": "$2b$10$bl.2Y0odKLXvhxTg/HHLseh4K8DCFIN90totFyn5g7VZ99H.1H1fW",
+  "active": true,
+  "phone": "324390491",
+  "roles": [
+    {
+      "$oid": "68ca15d710a0a35827bb3a2a"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-18T00:40:35.636Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T01:49:29.998Z"
+  },
+  "__v": 0,
+  "doctor": {
+    "isDoctor": true,
+    "clinicName": "cdg"
+  }
+},
+{
+  "_id": {
+    "$oid": "68cb552fed10320fa425445a"
+  },
+  "fullName": "ademo pnl",
+  "username": "ademo",
+  "username_lc": "ademo",
+  "passwordHash": "$2b$10$aQZZHeLXr4M8/yGpjy4ZO.O31kDmG.zELi2LsfLKqjHqGZBrP/v.W",
+  "active": true,
+  "phone": "36138613",
+  "roles": [
+    {
+      "$oid": "68cb5518ed10320fa425443f"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-18T00:41:19.292Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T01:50:22.212Z"
+  },
+  "__v": 0,
+  "doctor": {
+    "isDoctor": false
+  }
+},
+{
+  "_id": {
+    "$oid": "68cb71ea7461e8235a7a3809"
+  },
+  "fullName": "khaled abdellahi",
+  "username": "khaled",
+  "username_lc": "khaled",
+  "passwordHash": "$2b$10$Ad1V5UA7RKxZ3A8dKgB6ke63cLnYfckYZz734FDbUpHabh/AUxIoy",
+  "active": true,
+  "phone": "37111104",
+  "doctor": {
+    "isDoctor": true,
+    "clinicName": "cdg"
+  },
+  "roles": [
+    {
+      "$oid": "68cb5518ed10320fa425443f"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-18T02:43:54.888Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-18T02:43:54.888Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68ce2b4b0d37d2b124a86509"
+  },
+  "fullName": "sidi abdoullah",
+  "username": "sidi",
+  "username_lc": "sidi",
+  "passwordHash": "$2b$10$o.r8jEjTurX./BPIPVFF5uJJ1g9wtOfb0h9VVN6KKbXcCepFf644a",
+  "active": true,
+  "phone": "34893829",
+  "doctor": {
+    "isDoctor": true,
+    "clinicName": "cabinet a",
+    "phone": "34893829"
+  },
+  "roles": [],
+  "createdAt": {
+    "$date": "2025-09-20T04:19:23.397Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T04:19:23.397Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68ce361a0d37d2b124a88ab6"
+  },
+  "fullName": "aichetou abdellahi",
+  "username": "chite",
+  "username_lc": "chite",
+  "passwordHash": "$2b$10$aP/liW0nHlN7YEq5ZKWsyekZgSCFV9PPgbu9gV5Cw7W71a5RZjNC.",
+  "active": true,
+  "phone": "328918948",
+  "doctor": {
+    "isDoctor": false
+  },
+  "roles": [
+    {
+      "$oid": "68cb5518ed10320fa425443f"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-20T05:05:30.743Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T05:05:30.743Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68d1c68ca224525abe0a4acf"
+  },
+  "fullName": "nabil",
+  "username": "nabil",
+  "username_lc": "nabil",
+  "passwordHash": "$2b$10$oGOILSqAK0eX4NTpsRDgE.N0HscFDsvvyZXS5IdIVGlJOOoeqAOJK",
+  "active": true,
+  "phone": "32010171",
+  "doctor": {
+    "isDoctor": false
+  },
+  "roles": [
+    {
+      "$oid": "68ca15d710a0a35827bb3a2a"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-22T21:58:36.072Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T21:58:36.072Z"
+  },
+  "__v": 0,
+  "dev": true
+},
+{
+  "_id": {
+    "$oid": "68d226c9fef2fac1ecb18edb"
+  },
+  "fullName": "macha django",
+  "username": "macha",
+  "username_lc": "macha",
+  "passwordHash": "$2b$10$8oOFdpcOpC3SkB8HUBpuX.CqFLHJPIIgmxYJackywv7xKWzAM4Pze",
+  "active": true,
+  "phone": "383478278",
+  "doctor": {
+    "isDoctor": false
+  },
+  "roles": [
+    {
+      "$oid": "68cec06ec3b5dba13cdf3c67"
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-09-23T04:49:13.659Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-23T04:49:13.659Z"
+  },
+  "__v": 0
+}]

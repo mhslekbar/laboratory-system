@@ -1,0 +1,546 @@
+[{
+  "_id": {
+    "$oid": "68ced06fd6a3a78ad01d81ad"
+  },
+  "name": "SUPPRIMER",
+  "collectionName": "UTILISATEURS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-20T16:03:59.709Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T16:03:59.709Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68ced06fd6a3a78ad01d81ae"
+  },
+  "name": "MODIFIER",
+  "collectionName": "UTILISATEURS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-20T16:03:59.716Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T16:03:59.716Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68ced08dd6a3a78ad01d81b3"
+  },
+  "name": "AFFICHER_LIST",
+  "collectionName": "UTILISATEURS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-20T16:04:29.075Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T16:04:29.075Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68ced08dd6a3a78ad01d81b4"
+  },
+  "name": "AFFICHER",
+  "collectionName": "UTILISATEURS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-20T16:04:29.075Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-20T16:04:29.075Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f481850b8838154867d6"
+  },
+  "name": "SUPPRIMER",
+  "collectionName": "ROLES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:02:25.450Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:02:25.450Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f481850b8838154867d7"
+  },
+  "name": "MODIFIER",
+  "collectionName": "ROLES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:02:25.451Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:02:25.451Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f481850b8838154867d8"
+  },
+  "name": "AJOUTER",
+  "collectionName": "ROLES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:02:25.451Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:02:25.451Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f481850b8838154867d9"
+  },
+  "name": "AFFICHER",
+  "collectionName": "ROLES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:02:25.451Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:02:25.451Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f49a850b8838154867de"
+  },
+  "name": "AFFICHER",
+  "collectionName": "STATISTIQUES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:02:50.734Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:03:05.380Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f4cd850b8838154867f4"
+  },
+  "name": "SUPPRIMER",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f4cd850b8838154867f5"
+  },
+  "name": "MODIFIER",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f4cd850b8838154867f6"
+  },
+  "name": "AJOUTER",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f4cd850b8838154867f7"
+  },
+  "name": "AFFICHER",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:03:41.553Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f522850b883815486856"
+  },
+  "name": "SUPPRIMER_ETAPE",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f522850b883815486857"
+  },
+  "name": "MODIFIER_ETAPE",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f522850b883815486858"
+  },
+  "name": "AJOUTER_ETAPE",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f522850b883815486859"
+  },
+  "name": "AFFICHER_ETAPE",
+  "collectionName": "TYPES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:05:06.151Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f58a850b883815486860"
+  },
+  "name": "AJOUTER",
+  "collectionName": "UTILISATEURS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:06:50.347Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:06:50.347Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b883815486969"
+  },
+  "name": "AFFICHER_LIST",
+  "collectionName": "PATIENTS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.645Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.645Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b88381548696a"
+  },
+  "name": "AFFICHER",
+  "collectionName": "PATIENTS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b88381548696b"
+  },
+  "name": "AJOUTER",
+  "collectionName": "PATIENTS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b88381548696c"
+  },
+  "name": "MODIFIER",
+  "collectionName": "PATIENTS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b88381548696d"
+  },
+  "name": "SUPPRIMER",
+  "collectionName": "PATIENTS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b88381548696e"
+  },
+  "name": "AFFICHER_LIST",
+  "collectionName": "MEDECINS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.646Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b88381548696f"
+  },
+  "name": "AFFICHER",
+  "collectionName": "MEDECINS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b883815486970"
+  },
+  "name": "AJOUTER",
+  "collectionName": "MEDECINS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b883815486971"
+  },
+  "name": "MODIFIER",
+  "collectionName": "MEDECINS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f605850b883815486972"
+  },
+  "name": "SUPPRIMER",
+  "collectionName": "MEDECINS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:08:53.647Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a3"
+  },
+  "name": "AFFICHER_LIST",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a4"
+  },
+  "name": "AFFICHER",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a5"
+  },
+  "name": "AJOUTER",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a6"
+  },
+  "name": "MODIFIER",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.839Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a7"
+  },
+  "name": "SUPPRIMER",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a8"
+  },
+  "name": "AVANCER",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869a9"
+  },
+  "name": "PRET",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:33.058Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869aa"
+  },
+  "name": "APPROUVER",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d0f69a850b8838154869ab"
+  },
+  "name": "AJOUTER_PJ",
+  "collectionName": "DOSSIERS",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T07:11:22.840Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d15fc37f3525bd60ede588"
+  },
+  "name": "AFFICHER",
+  "collectionName": "PARAMETRES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T14:40:03.864Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T14:40:03.864Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68d15fc37f3525bd60ede589"
+  },
+  "name": "MODIFIER",
+  "collectionName": "PARAMETRES",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-09-22T14:40:03.865Z"
+  },
+  "updatedAt": {
+    "$date": "2025-09-22T14:40:03.865Z"
+  }
+}]
