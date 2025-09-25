@@ -1,13 +1,13 @@
 // src/redux/settings/settingsApiCalls.ts (refactor en thunks qui DISPATCHENT)
 import { Dispatch } from "react";
-import { getCustom, put, post } from "../../requestMethods";
+import { get, put, post } from "../../requestMethods";
 import { gsStart, gsSuccess, gsFailure } from "./generalSlice";
 
 // FETCH
 export const fetchGeneralSettings = () => async (dispatch: Dispatch<any>) => {
   try {
     dispatch(gsStart());
-    const res = await getCustom("settings/general");
+    const res = await get("settings/general");
     dispatch(gsSuccess(res?.data?.success));
     return res?.data?.success; // pour que le composant puisse setState si besoin
   } catch (e: any) {

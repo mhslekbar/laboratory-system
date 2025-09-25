@@ -1,27 +1,33 @@
 // server/middlewares/security.ts
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+// If you’re already sanitizing in app.ts with ExpressMongoSanitize,
+// you can remove the next line. Keeping it here is harmless but redundant.
 import mongoSanitize from "express-mongo-sanitize";
 
-// ---- ENV helpers (clamp to safe values) ----
+/* ================================
+   Safe ENV helpers
+================================ */
 const getNum = (v: any, def: number) => {
   const n = parseInt(String(v ?? ""), 10);
   return Number.isFinite(n) && n > 0 ? n : def;
 };
 
-// Allow env overrides (optional). If undefined/invalid → fallback.
-const RL_WINDOW_MS = getNum(process.env.RATE_LIMIT_WINDOW_MS, 60_000); // 1 min
+// Allow env overrides (fallback to sane defaults)
+const RL_WINDOW_MS = getNum(process.env.RATE_LIMIT_WINDOW_MS, 60_000); // 60s
 let RL_MAX = getNum(process.env.RATE_LIMIT_MAX, 300);                  // 300/min
-if (RL_MAX <= 0) RL_MAX = 300; // never allow 0
+if (RL_MAX <= 0) RL_MAX = 300;
 
-// CORS allowlist (from your .env)
+/* ================================
+   CORS
+================================ */
 const allowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map(s => s.trim())
   .filter(Boolean);
 
-// Always include localhost for development tooling if needed
+// Always include localhost for dev
 const defaultOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -31,57 +37,81 @@ const origins = [...new Set([...defaultOrigins, ...allowedOrigins])];
 
 export const corsOptions: cors.CorsOptions = {
   origin(origin, cb) {
-    if (!origin) return cb(null, true); // curl/postman
-    return origins.includes(origin) ? cb(null, true) : cb(new Error(`CORS blocked origin: ${origin}`));
+    // Allow non-browser tools (curl/postman) with no origin
+    if (!origin) return cb(null, true);
+    return origins.includes(origin)
+      ? cb(null, true)
+      : cb(new Error(`CORS blocked origin: ${origin}`));
   },
   credentials: true,
   methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cache-Control"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Cache-Control",
+  ],
   exposedHeaders: ["Content-Length", "Content-Range"],
-  maxAge: 86400,
+  maxAge: 86400,           // cache preflight for 24h
   optionsSuccessStatus: 204,
 };
 
+// Preflight helper (use in app.options("*", corsPreflight))
 export const corsPreflight = cors(corsOptions);
 
-// Base limiter (sane, never zero)
+/* ================================
+   Rate limiting
+   IMPORTANT: app.set("trust proxy", true) must be set in your app
+================================ */
+
+// Base limiter applied to most routes
 const baseLimiter = rateLimit({
-  windowMs: RL_WINDOW_MS,       // e.g., 60s
-  max: RL_MAX,                  // e.g., 300 req/min per IP
-  standardHeaders: true,        // RateLimit-* headers
+  windowMs: RL_WINDOW_MS,
+  max: RL_MAX,
+  standardHeaders: true,  // sends RateLimit-* headers
   legacyHeaders: false,
-  keyGenerator: (req) =>
-    // requires app.set('trust proxy', 1) so req.ip is client IP
-    req.ip || (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "anon",
+  // ✅ Normalize IPv4/IPv6 safely to avoid ERR_ERL_KEY_GEN_IPV6
+  keyGenerator: (req: any) => ipKeyGenerator(req),
   message: { error: "Too many requests, please try again later." },
 });
 
-// Very light limiter (effectively “no limit”) for harmless/public reads
+// Very light limiter for harmless/public endpoints
 const lightLimiter = rateLimit({
   windowMs: 60_000,
-  max: 10_000,                  // practically unlimited per minute
+  max: 10_000,            // practically unlimited per minute
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || "anon",
+  keyGenerator: (req: any) => ipKeyGenerator(req),
 });
 
+/* ================================
+   Security middleware stack
+================================ */
 export function securityMiddlewares() {
   return [
+    // Helmet with CORP disabled so you can serve assets across origins if needed
     helmet({ crossOriginResourcePolicy: false }),
+
+    // CORS
     cors(corsOptions),
+
+    // Optional: request sanitization (remove if already applied in app.ts)
     mongoSanitize(),
 
-    // Route-aware limiter: exempt or lighten specific endpoints
+    // Route-aware rate-limiter switch
     (req: any, res: any, next: any) => {
       const p = req.path;
-      // Health & ping are safe
+
+      // Health checks → super light limiter
       if (p === "/health" || p === "/api/health" || p === "/api/ping") {
         return (lightLimiter as any)(req, res, next);
       }
-      // Settings general is hit on every app load → use light limiter
+
+      // Settings bootstrap endpoint (hit on app load) → light limiter
       if (p === "/api/settings/general") {
         return (lightLimiter as any)(req, res, next);
       }
+
       // Everything else → base limiter
       return (baseLimiter as any)(req, res, next);
     },

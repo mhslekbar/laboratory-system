@@ -33,7 +33,7 @@ export async function buildApp() {
 
   // Core middlewares
   app.disable("x-powered-by");
-  app.set("trust proxy", 1);
+  app.set("trust proxy", true);
   app.use(requestId);
   app.use(morganLogger);
 
