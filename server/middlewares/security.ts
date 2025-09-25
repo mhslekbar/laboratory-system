@@ -2,8 +2,7 @@
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-// If you’re already sanitizing in app.ts with ExpressMongoSanitize,
-// you can remove the next line. Keeping it here is harmless but redundant.
+// Optional if already used in app.ts
 import mongoSanitize from "express-mongo-sanitize";
 
 /* ================================
@@ -56,7 +55,7 @@ export const corsOptions: cors.CorsOptions = {
   optionsSuccessStatus: 204,
 };
 
-// Preflight helper (use in app.options("*", corsPreflight))
+// Preflight helper
 export const corsPreflight = cors(corsOptions);
 
 /* ================================
@@ -68,7 +67,7 @@ export const corsPreflight = cors(corsOptions);
 const baseLimiter = rateLimit({
   windowMs: RL_WINDOW_MS,
   max: RL_MAX,
-  standardHeaders: true,  // sends RateLimit-* headers
+  standardHeaders: true,  // RateLimit-* headers
   legacyHeaders: false,
   // ✅ Normalize IPv4/IPv6 safely to avoid ERR_ERL_KEY_GEN_IPV6
   keyGenerator: (req: any) => ipKeyGenerator(req),
@@ -89,13 +88,8 @@ const lightLimiter = rateLimit({
 ================================ */
 export function securityMiddlewares() {
   return [
-    // Helmet with CORP disabled so you can serve assets across origins if needed
     helmet({ crossOriginResourcePolicy: false }),
-
-    // CORS
     cors(corsOptions),
-
-    // Optional: request sanitization (remove if already applied in app.ts)
     mongoSanitize(),
 
     // Route-aware rate-limiter switch
@@ -107,7 +101,7 @@ export function securityMiddlewares() {
         return (lightLimiter as any)(req, res, next);
       }
 
-      // Settings bootstrap endpoint (hit on app load) → light limiter
+      // Settings bootstrap endpoint → light limiter
       if (p === "/api/settings/general") {
         return (lightLimiter as any)(req, res, next);
       }

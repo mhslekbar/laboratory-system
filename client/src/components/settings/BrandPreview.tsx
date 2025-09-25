@@ -14,6 +14,7 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
 );
 
 const BrandPreview: React.FC<Props> = ({ logoUrl, faviconUrl, alt="Preview" }: any) => {
+  console.log("logoUrl: ", logoUrl)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {/* Logo */}

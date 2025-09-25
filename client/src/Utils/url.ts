@@ -7,7 +7,6 @@ export const resolveAssetUrl = (u?: string, host?: string) => {
   if (!host) return u;
   const base = host.replace(/\/+$/, "");
   const path = u.startsWith("/") ? u : `/${u}`;
-  console.log(`${base}${path}: `, `${base}${path}`)
   return `${base}${path}`;
 };
 
