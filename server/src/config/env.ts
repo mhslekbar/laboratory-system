@@ -13,8 +13,6 @@ const ENV_ROOT = path.resolve(__dirname, "../.."); // ⬅️ يشير إلى ser
 // ترتيب التحميل (الأعلى أولوية أولاً)
 const CANDIDATES = [
   `.env.${NODE_ENV}.local`,
-  `.env.local`,
-  `.env.${NODE_ENV}`,
   `.env`,
 ].map((f) => path.join(ENV_ROOT, f));
 

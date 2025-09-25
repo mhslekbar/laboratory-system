@@ -107,7 +107,8 @@ export async function buildApp() {
   };
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("SIGTERM", () => shutdown("SIGTERM"));
-
+  console.log("Running in", process.env.NODE_ENV, "mode");
+  
   return app;
 }
 
