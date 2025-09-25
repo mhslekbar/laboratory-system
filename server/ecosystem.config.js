@@ -1,8 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: "lab-system",
-      script: "./dist/server.js",
+      name: "lab-sys",
+      script: "./dist/src/server.js",
       // Valeurs par défaut quand tu lances sans --env
       env: {
         NODE_ENV: "development",

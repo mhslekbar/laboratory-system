@@ -19,7 +19,6 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
   try {
 
     const authHeader = req.headers.authorization as string | undefined;
-    
     // Pas d’en-tête Authorization → on signale au client de tenter un refresh
     if (!authHeader) {
       return res.status(403).json({ error: "TOKEN_EXPIRED", reason: "NO_AUTH_HEADER" });

@@ -87,6 +87,8 @@ const lightLimiter = rateLimit({
    Security middleware stack
 ================================ */
 export function securityMiddlewares() {
+  console.log("origins: ", origins);
+  console.log("process.env.CORS_ORIGIN: ", process.env.CORS_ORIGIN);
   return [
     helmet({ crossOriginResourcePolicy: false }),
     cors(corsOptions),

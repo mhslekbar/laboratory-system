@@ -52,7 +52,7 @@ export const signup = async (req: Request, res: Response) => {
       active: true
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: {
         id: user._id,
         fullName: user.fullName,
@@ -85,12 +85,12 @@ export const login = async (req: Request, res: Response) => {
       });
 
     if (!user) {
-      return res.status(401).json(["Identifiants invalides"]);
+      return res.status(300).json({ formErrors : ["Identifiants invalides"] });
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      return res.status(401).json(["Identifiants invalides"]);
+      return res.status(300).json({ formErrors : ["Identifiants invalides"] });
     }
 
     const accessToken = signAccessToken(user._id.toString());
@@ -121,7 +121,7 @@ export const refresh = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body as { refreshToken?: string };
     if (!refreshToken) {
-      return res.status(401).json(["Refresh token manquant"]);
+      return res.status(300).json(["Refresh token manquant"]);
     }
 
     let payload: any;
@@ -129,12 +129,12 @@ export const refresh = async (req: Request, res: Response) => {
       payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SEC!);
     } catch (e: any) {
       // expired / invalid refresh → force re-login
-      return res.status(401).json(["Refresh token invalide"]);
+      return res.status(300).json(["Refresh token invalide"]);
     }
 
     const user = await UserModel.findById(payload.id ?? payload.sub ?? payload.userId);
     if (!user || !user.active) {
-      return res.status(401).json(["Utilisateur inactif ou introuvable"]);
+      return res.status(300).json(["Utilisateur inactif ou introuvable"]);
     }
 
     const newAccess = signAccessToken(user._id.toString());

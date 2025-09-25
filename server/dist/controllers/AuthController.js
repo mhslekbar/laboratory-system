@@ -46,7 +46,7 @@ const signup = async (req, res) => {
             doctor: doctor ?? undefined,
             active: true
         });
-        return res.status(201).json({
+        return res.status(200).json({
             success: {
                 id: user._id,
                 fullName: user.fullName,
@@ -77,11 +77,11 @@ const login = async (req, res) => {
             },
         });
         if (!user) {
-            return res.status(401).json(["Identifiants invalides"]);
+            return res.status(300).json({ formErrors: ["Identifiants invalides"] });
         }
         const ok = await bcryptjs_1.default.compare(password, user.passwordHash);
         if (!ok) {
-            return res.status(401).json(["Identifiants invalides"]);
+            return res.status(300).json({ formErrors: ["Identifiants invalides"] });
         }
         const accessToken = signAccessToken(user._id.toString());
         const refreshToken = signRefreshToken(user._id.toString());
@@ -109,7 +109,7 @@ const refresh = async (req, res) => {
     try {
         const { refreshToken } = req.body;
         if (!refreshToken) {
-            return res.status(401).json(["Refresh token manquant"]);
+            return res.status(300).json(["Refresh token manquant"]);
         }
         let payload;
         try {
@@ -117,11 +117,11 @@ const refresh = async (req, res) => {
         }
         catch (e) {
             // expired / invalid refresh → force re-login
-            return res.status(401).json(["Refresh token invalide"]);
+            return res.status(300).json(["Refresh token invalide"]);
         }
         const user = await UserModel_1.default.findById(payload.id ?? payload.sub ?? payload.userId);
         if (!user || !user.active) {
-            return res.status(401).json(["Utilisateur inactif ou introuvable"]);
+            return res.status(300).json(["Utilisateur inactif ou introuvable"]);
         }
         const newAccess = signAccessToken(user._id.toString());
         const newRefresh = signRefreshToken(user._id.toString());
