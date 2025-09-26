@@ -2,24 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
     <meta
-      name="description"
-      content="Web application created by Mohamed Salem Lekbar"
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo128.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Theme color is dynamically set by useDynamicHead; this is a safe fallback -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Basic SEO fallback; useDynamicHead will override description when settings load -->
+    <meta name="description" content="Web application created by Mohamed Salem Lekbar" />
+
+    <!-- Fallback icons (dynamic ones come from useDynamicHead once settings load) -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/apple-180.png" />
+
+    <!-- PWA -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <meta name="mobile-web-app-capable" content="yes">
+
     <title>LAB SYSTEM</title>
+
+    <!-- Print tweaks -->
     <style media="print">
-      body {
-        background-color: #FFF;
-      }
+      body { background-color: #fff; }
     </style>
   </head>
-
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>

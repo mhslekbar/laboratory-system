@@ -1,24 +1,14 @@
 {
-  "short_name": "Mern Template Example",
-  "name": "mern template",
+  "short_name": "LabSys",
+  "name": "LAB SYSTEM",
   "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "react128.png",
-      "type": "image/png",
-      "sizes": "128x128"
-    },
-    {
-      "src": "react512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"
