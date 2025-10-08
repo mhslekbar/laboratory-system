@@ -27,3 +27,4 @@ const app_1 = __importDefault(require("./app"));
         process.exit(1);
     }
 })();
+//# sourceMappingURL=server.js.map

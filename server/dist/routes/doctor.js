@@ -24,3 +24,4 @@ router.post("/cases/:id/approve", guards_1.requireDoctor, (req, res) => {
     return (0, CaseController_1.approveCase)(req, res);
 });
 exports.default = router;
+//# sourceMappingURL=doctor.js.map

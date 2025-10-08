@@ -1,0 +1,28 @@
+// src/config/corsOptions.ts
+import { CorsOptions } from "cors";
+
+const allowedOrigins = [
+  "https://medepratlab.com",
+  "https://www.medepratlab.com",
+];
+
+export const corsOptions: CorsOptions = {
+  origin(origin, cb) {
+    // Autoriser requêtes server-to-server et outils (sans header Origin)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true, // cookies / Authorization cross-site si besoin
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["X-Total-Count"],
+  optionsSuccessStatus: 204,
+};
+
+// export const corsPreflight = cors(corsOptions);
+
+export const corsPreflight = (req: any, res: any) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+}

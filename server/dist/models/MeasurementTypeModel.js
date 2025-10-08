@@ -33,13 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-// models/MeasurementTypeModel.ts
 const mongoose_1 = __importStar(require("mongoose"));
+/* ================== Schemas ================== */
 const StageTemplateSchema = new mongoose_1.Schema({
-    key: { type: String, required: true, trim: true },
     name: { type: String, required: true, trim: true },
     order: { type: Number, required: true, min: 0 },
     color: { type: String, default: "#2563eb" },
+    allowedRoles: [
+        { type: mongoose_1.Schema.Types.ObjectId, ref: "role", required: true },
+    ],
 }, { _id: true, timestamps: false });
 const MeasurementTypeSchema = new mongoose_1.Schema({
     key: { type: String, required: true, unique: true, index: true, trim: true },
@@ -47,3 +49,4 @@ const MeasurementTypeSchema = new mongoose_1.Schema({
     stages: { type: [StageTemplateSchema], default: [] },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("measurementtype", MeasurementTypeSchema);
+//# sourceMappingURL=MeasurementTypeModel.js.map

@@ -11,3 +11,4 @@ TodoRoute.post("/", TodoController_1.createTodo);
 TodoRoute.put("/:id", TodoController_1.updateTodo);
 TodoRoute.delete("/:id", TodoController_1.deleteTodo);
 exports.default = TodoRoute;
+//# sourceMappingURL=todo.js.map

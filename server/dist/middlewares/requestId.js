@@ -13,3 +13,4 @@ function requestId(req, _res, next) {
 }
 morgan_1.default.token("id", (req) => req.requestId || "-");
 exports.morganLogger = (0, morgan_1.default)(':id :method :url :status :res[content-length] - :response-time ms');
+//# sourceMappingURL=requestId.js.map

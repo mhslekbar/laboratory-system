@@ -43,3 +43,4 @@ const PermissionSchema = new mongoose_1.Schema({
 PermissionSchema.index({ name: 1, collectionName: 1 }, { unique: true });
 const Permission = mongoose_1.default.model("permission", PermissionSchema);
 exports.default = Permission;
+//# sourceMappingURL=PermissionModel.js.map

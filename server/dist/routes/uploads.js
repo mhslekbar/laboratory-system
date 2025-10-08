@@ -7,3 +7,4 @@ const uploadsRoute = (0, express_1.Router)();
 // POST /api/uploads/image?folder=logos
 uploadsRoute.post("/image", multerUploads_1.uploadOneImage, uploadsController_1.uploadImage);
 exports.default = uploadsRoute;
+//# sourceMappingURL=uploads.js.map

@@ -33,8 +33,6 @@ const connectDB = async () => {
     try {
         const logUri = sanitizeUri(uri);
         if (!cache.promise) {
-            console.log("env: ", env_1.env.NODE_ENV);
-            console.log(`⏳ Connecting MongoDB → ${logUri}`);
             cache.promise = mongoose_1.default.connect(uri, opts).then((m) => m);
         }
         cache.conn = await cache.promise;
@@ -75,3 +73,4 @@ const closeDB = async () => {
     }
 };
 exports.closeDB = closeDB;
+//# sourceMappingURL=db.js.map

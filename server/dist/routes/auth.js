@@ -11,3 +11,4 @@ AuthRoute.post("/login", AuthController_1.login);
 AuthRoute.post("/refresh", AuthController_1.refresh);
 AuthRoute.post("/signup", AuthController_1.signup);
 exports.default = AuthRoute;
+//# sourceMappingURL=auth.js.map

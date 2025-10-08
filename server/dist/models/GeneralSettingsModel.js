@@ -71,3 +71,4 @@ const GeneralSettingsSchema = new mongoose_1.Schema({
 // Un seul doc (singleton). On peut aussi imposer une contrainte si besoin.
 exports.GeneralSettingsModel = mongoose_1.default.models.general_settings ||
     mongoose_1.default.model("general_settings", GeneralSettingsSchema);
+//# sourceMappingURL=GeneralSettingsModel.js.map

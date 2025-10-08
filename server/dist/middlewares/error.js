@@ -12,3 +12,4 @@ function errorHandler(err, _req, res, _next) {
         payload.stack = err.stack;
     res.status(status).json(payload);
 }
+//# sourceMappingURL=error.js.map

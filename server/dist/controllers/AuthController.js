@@ -83,8 +83,9 @@ const login = async (req, res) => {
         if (!ok) {
             return res.status(300).json({ formErrors: ["Identifiants invalides"] });
         }
-        const accessToken = signAccessToken(user._id.toString());
-        const refreshToken = signRefreshToken(user._id.toString());
+        console.log("User logged in: ", user);
+        const accessToken = signAccessToken(user._id?.toString());
+        const refreshToken = signRefreshToken(user._id?.toString());
         // Récup des rôles & permissions (optionnel mais pratique côté front)
         const roleNames = [];
         const perms = new Set();
@@ -137,3 +138,4 @@ const refresh = async (req, res) => {
     }
 };
 exports.refresh = refresh;
+//# sourceMappingURL=AuthController.js.map

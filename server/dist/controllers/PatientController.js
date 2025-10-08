@@ -215,3 +215,4 @@ const deletePatient = async (req, res) => {
     }
 };
 exports.deletePatient = deletePatient;
+//# sourceMappingURL=PatientController.js.map

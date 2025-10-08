@@ -40,3 +40,4 @@ exports.uploadOneImage = (0, multer_1.default)({
         fileSize: 10 * 1024 * 1024, // 10MB (adapte)
     },
 }).single("file");
+//# sourceMappingURL=multerUploads.js.map

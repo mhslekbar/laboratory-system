@@ -8,3 +8,4 @@ const requireDoctor = (req, res, next) => {
     next();
 };
 exports.requireDoctor = requireDoctor;
+//# sourceMappingURL=guards.js.map

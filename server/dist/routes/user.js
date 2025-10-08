@@ -18,3 +18,4 @@ UserRoute.delete("/:id", (0, authorizedPermission_1.authorizedPermission)(["SUPP
 // authorizedPermission(["MODIFIER"], "UTILISATEURS"),
 // authorizedPermission(["SUPPRIMER"], "UTILISATEURS"),
 exports.default = UserRoute;
+//# sourceMappingURL=user.js.map

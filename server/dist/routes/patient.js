@@ -18,3 +18,4 @@ PatientRoute.delete("/:id", (0, authorizedPermission_1.authorizedPermission)(["S
 // authorizedPermission(["MODIFIER"], "PATIENTS"),
 // authorizedPermission(["SUPPRIMER"], "PATIENTS"),
 exports.default = PatientRoute;
+//# sourceMappingURL=patient.js.map

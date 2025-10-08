@@ -53,3 +53,4 @@ RoleSchema.statics.build = function (attrs) {
 };
 const Role = mongoose_1.default.model("role", RoleSchema);
 exports.default = Role;
+//# sourceMappingURL=RoleModel.js.map

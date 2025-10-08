@@ -51,3 +51,4 @@ const verifyToken = async (req, res, next) => {
     }
 };
 exports.verifyToken = verifyToken;
+//# sourceMappingURL=verifyToken.js.map

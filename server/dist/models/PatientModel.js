@@ -49,3 +49,4 @@ PatientSchema.index({ phone: 1 });
 // Recherches rapides par docteur + nom
 PatientSchema.index({ doctor: 1, name: 1 });
 exports.default = mongoose_1.default.model("patient", PatientSchema);
+//# sourceMappingURL=PatientModel.js.map

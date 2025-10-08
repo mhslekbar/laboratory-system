@@ -60,3 +60,4 @@ const uploadImage = async (req, res) => {
     }
 };
 exports.uploadImage = uploadImage;
+//# sourceMappingURL=uploadsController.js.map

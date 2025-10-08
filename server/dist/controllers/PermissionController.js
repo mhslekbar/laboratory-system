@@ -212,3 +212,4 @@ const deleteAllPermission = async (_req, res) => {
     }
 };
 exports.deleteAllPermission = deleteAllPermission;
+//# sourceMappingURL=PermissionController.js.map

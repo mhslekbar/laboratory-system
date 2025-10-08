@@ -9,3 +9,4 @@ const SettingsRoute = (0, express_1.Router)();
 SettingsRoute.get("/general", (0, authorizedPermission_1.authorizedPermission)(["AFFICHER"], "PARAMETRES"), GeneralSettingsController_1.getGeneralSettings);
 SettingsRoute.put("/general", (0, authorizedPermission_1.authorizedPermission)(["MODIFIER"], "PARAMETRES"), GeneralSettingsController_1.putGeneralSettings);
 exports.default = SettingsRoute;
+//# sourceMappingURL=settings.js.map

@@ -7,3 +7,4 @@ const setCacheControl = (req, res, next) => {
     next();
 };
 exports.setCacheControl = setCacheControl;
+//# sourceMappingURL=setCacheControl.js.map

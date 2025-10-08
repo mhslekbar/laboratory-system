@@ -94,3 +94,4 @@ async function buildApp() {
     return app;
 }
 exports.default = buildApp;
+//# sourceMappingURL=app.js.map

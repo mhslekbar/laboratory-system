@@ -238,3 +238,4 @@ const listDoctors = async (req, res) => {
     }
 };
 exports.listDoctors = listDoctors;
+//# sourceMappingURL=UserController.js.map

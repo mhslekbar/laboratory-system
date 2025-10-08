@@ -17,3 +17,4 @@ RoleRoute.delete('/:id', (0, authorizedPermission_1.authorizedPermission)(["SUPP
 // authorizedPermission(["MODIFIER"], "ROLES"),
 // authorizedPermission(["SUPPRIMER"], "ROLES"),
 exports.default = RoleRoute;
+//# sourceMappingURL=role.js.map

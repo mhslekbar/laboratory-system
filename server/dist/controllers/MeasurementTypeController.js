@@ -14,27 +14,34 @@ const toPosInt = (raw, def = 1, max = 1000000) => {
     return Math.min(n, max);
 };
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isValidObjectId = (v) => typeof v === "string" && mongoose_1.default.Types.ObjectId.isValid(v);
 const validateStageList = (stages = []) => {
-    const keys = new Set();
     for (const s of stages) {
-        if (!s.key?.trim())
-            return "Chaque étape doit avoir un 'key'.";
-        if (keys.has(s.key))
-            return `Étape en double: '${s.key}'.`;
-        keys.add(s.key);
         if (!s.name?.trim())
-            return `L'étape '${s.key}' doit avoir un nom.`;
+            return `Chaque étape doit avoir un 'name'.`;
         if (typeof s.order !== "number" || s.order < 1)
-            return `L'étape '${s.key}' a un 'order' invalide.`;
+            return `L'étape '${s.name}' a un 'order' invalide (>= 1).`;
+        if (s.allowedRoles) {
+            if (!Array.isArray(s.allowedRoles))
+                return `allowedRoles doit être un tableau.`;
+            for (const r of s.allowedRoles) {
+                if (!isValidObjectId(String(r)))
+                    return `allowedRoles contient un ObjectId invalide.`;
+            }
+        }
     }
     return null;
 };
 const normalizeStages = (stages = []) => stages.map((s, i) => ({
-    key: s.key?.trim(),
+    _id: isValidObjectId(String(s._id)) ? new mongoose_1.default.Types.ObjectId(String(s._id)) : undefined,
     name: s.name?.trim(),
     order: typeof s.order === "number" && s.order >= 1 ? s.order : i + 1,
     color: s.color?.trim(),
+    allowedRoles: Array.isArray(s.allowedRoles)
+        ? s.allowedRoles.map((r) => new mongoose_1.default.Types.ObjectId(String(r)))
+        : [],
 }));
+/** ===== List ===== */
 const listMeasurementTypes = async (req, res) => {
     try {
         const { q, page: pageRaw, limit: limitRaw } = req.query;
@@ -45,7 +52,7 @@ const listMeasurementTypes = async (req, res) => {
         if (q?.trim()) {
             const rx = new RegExp(escapeRegex(q.trim()), "i");
             and.push({
-                $or: [{ key: rx }, { name: rx }, { "stages.name": rx }, { "stages.key": rx }],
+                $or: [{ key: rx }, { name: rx }, { "stages.name": rx }],
             });
         }
         const filter = and.length ? { $and: and } : {};
@@ -54,9 +61,7 @@ const listMeasurementTypes = async (req, res) => {
             MeasurementTypeModel_1.default.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
         ]);
         const pages = Math.max(1, Math.ceil(total / limit));
-        return res
-            .status(200)
-            .json({
+        return res.status(200).json({
             success: {
                 items,
                 total,
@@ -73,6 +78,7 @@ const listMeasurementTypes = async (req, res) => {
     }
 };
 exports.listMeasurementTypes = listMeasurementTypes;
+/** ===== Create ===== */
 const createMeasurementType = async (req, res) => {
     try {
         const { key, name, stages = [] } = req.body;
@@ -85,7 +91,16 @@ const createMeasurementType = async (req, res) => {
         const exists = await MeasurementTypeModel_1.default.findOne({ key });
         if (exists)
             return res.status(400).json({ formErrors: [`'key' déjà utilisé: ${key}`] });
-        const created = await MeasurementTypeModel_1.default.create({ key, name, stages: normalized });
+        const created = await MeasurementTypeModel_1.default.create({
+            key,
+            name,
+            stages: normalized.map((s) => ({
+                name: s.name,
+                color: s.color,
+                order: s.order,
+                allowedRoles: s.allowedRoles || [],
+            })),
+        });
         if (!created)
             return res.status(400).json({ formErrors: ["Création échouée."] });
         return (0, exports.listMeasurementTypes)(req, res);
@@ -96,10 +111,10 @@ const createMeasurementType = async (req, res) => {
 };
 exports.createMeasurementType = createMeasurementType;
 /**
- * IMPORTANT: لا نستبدل stages بالكامل حتى لا نخسر _id (المراجع من Case).
- * - إن أُرسلت stages: نحدّث الموجودة حسب key (نُبقي _id كما هو)،
- *   ونضيف فقط المراحل الجديدة (keys غير الموجودة).
- * - لا نحذف المراحل الغائبة هنا؛ الحذف يتم عبر removeStage (مع فحص الاستعمال في Case).
+ * IMPORTANT:
+ * - We DO NOT replace the whole 'stages' array to preserve existing _id (referenced by Case).
+ * - If 'stages' sent: update existing ones by _id; add only new ones (no delete here).
+ * - Deletions happen via removeStage (with Case usage checks).
  */
 const updateMeasurementType = async (req, res) => {
     try {
@@ -115,26 +130,30 @@ const updateMeasurementType = async (req, res) => {
             const err = validateStageList(normalized);
             if (err)
                 return res.status(400).json({ formErrors: [err] });
-            // خريطة الموجودين بحسب key للحفاظ على _id
-            const existingByKey = new Map(doc.stages.map((s) => [s.key, s]));
-            // تحديث/إضافة بدون حذف
+            // Map existing by _id (string)
+            const existingById = new Map(doc.stages.map((s) => [String(s._id), s]));
             for (const s of normalized) {
-                const exists = existingByKey.get(s.key);
-                if (exists) {
-                    exists.name = s.name;
-                    exists.color = s.color;
-                    exists.order = s.order;
+                if (s._id && existingById.has(String(s._id))) {
+                    // update in place
+                    const tgt = existingById.get(String(s._id));
+                    tgt.name = s.name;
+                    tgt.color = s.color;
+                    tgt.order = s.order;
+                    if (Array.isArray(s.allowedRoles)) {
+                        tgt.allowedRoles = s.allowedRoles;
+                    }
                 }
                 else {
+                    // add new stage
                     doc.stages.push({
-                        key: s.key,
                         name: s.name,
                         color: s.color,
                         order: s.order,
+                        allowedRoles: s.allowedRoles || [],
                     });
                 }
             }
-            // إعادة ترتيب 1..N
+            // Reorder 1..N
             doc.stages = [...doc.stages]
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
                 .map((s, i) => ({ ...s, order: i + 1 }));
@@ -147,18 +166,14 @@ const updateMeasurementType = async (req, res) => {
     }
 };
 exports.updateMeasurementType = updateMeasurementType;
+/** ===== Delete Type (unchanged) ===== */
 const deleteMeasurementType = async (req, res) => {
     try {
         const { id } = req.params;
-        // امنع الحذف إذا هناك Cases تعتمد هذا النوع
         const usedCount = await CaseModel_1.default.countDocuments({ type: new mongoose_1.default.Types.ObjectId(id) });
         if (usedCount > 0) {
-            return res
-                .status(400)
-                .json({
-                formErrors: [
-                    `Impossible de supprimer: ${usedCount} dossier(s) utilisent ce type.`,
-                ],
+            return res.status(400).json({
+                formErrors: [`Impossible de supprimer: ${usedCount} dossier(s) utilisent ce type.`],
             });
         }
         const deleted = await MeasurementTypeModel_1.default.findByIdAndDelete(id);
@@ -171,29 +186,28 @@ const deleteMeasurementType = async (req, res) => {
     }
 };
 exports.deleteMeasurementType = deleteMeasurementType;
-/** === Actions ciblées sur stages === */
+/** ===== Stages actions (now use :stageId) ===== */
+/** Add a stage (no key anymore) */
 const addStage = async (req, res) => {
     try {
         const { id } = req.params;
         const { stage } = req.body;
-        if (!stage?.key?.trim() || !stage?.name?.trim())
-            return res.status(400).json({ formErrors: ["Étape invalide."] });
+        if (!stage?.name?.trim())
+            return res.status(400).json({ formErrors: ["Étape invalide: 'name' requis."] });
         const doc = await MeasurementTypeModel_1.default.findById(id);
         if (!doc)
             return res.status(404).json({ formErrors: ["Type non trouvé."] });
-        if (doc.stages.some((s) => s.key === stage.key)) {
-            return res
-                .status(400)
-                .json({ formErrors: [`Étape '${stage.key}' existe déjà.`] });
-        }
         const maxOrder = doc.stages.reduce((m, s) => Math.max(m, s.order || 0), 0);
+        const allowedRoles = Array.isArray(stage.allowedRoles)
+            ? stage.allowedRoles.map((r) => new mongoose_1.default.Types.ObjectId(String(r)))
+            : [];
         doc.stages.push({
-            key: stage.key.trim(),
             name: stage.name.trim(),
             color: stage.color?.trim(),
-            order: stage.order && stage.order > 0 ? stage.order : maxOrder + 1,
+            order: typeof stage.order === "number" && stage.order > 0 ? stage.order : maxOrder + 1,
+            allowedRoles,
         });
-        // إعادة ترقيم 1..N
+        // Reorder 1..N
         doc.stages = [...doc.stages]
             .sort((a, b) => (a.order || 0) - (b.order || 0))
             .map((s, i) => ({ ...s, order: i + 1 }));
@@ -206,34 +220,37 @@ const addStage = async (req, res) => {
 };
 exports.addStage = addStage;
 /**
- * updateStage يدعم تغيير key أيضاً (مع التحقق من التفرد)
- * params: :id, :stageKey (القديمة)
- * body: { name?, color?, order?, key? }
+ * Update a stage by :stageId
+ * params: :id, :stageId
+ * body: { name?, color?, order?, allowedRoles? }
  */
 const updateStage = async (req, res) => {
     try {
-        const { id, stageKey } = req.params;
-        const { name, color, order, key } = req.body;
+        const { id, stageId } = req.params;
+        const { name, color, order, allowedRoles } = req.body;
+        if (!isValidObjectId(stageId))
+            return res.status(400).json({ formErrors: ["stageId invalide."] });
         const doc = await MeasurementTypeModel_1.default.findById(id);
         if (!doc)
             return res.status(404).json({ formErrors: ["Type non trouvé."] });
-        const idx = doc.stages.findIndex((s) => s.key === stageKey);
+        const idx = doc.stages.findIndex((s) => String(s._id) === String(stageId));
         if (idx < 0)
             return res.status(404).json({ formErrors: ["Étape non trouvée."] });
-        // لو طلب تغيير key، تحقق التفرد
-        if (typeof key === "string" && key.trim() && key.trim() !== stageKey) {
-            if (doc.stages.some((s, i) => i !== idx && s.key === key.trim())) {
-                return res.status(400).json({ formErrors: [`'key' déjà utilisé: ${key.trim()}`] });
-            }
-            doc.stages[idx].key = key.trim();
-        }
         if (typeof name === "string")
             doc.stages[idx].name = name.trim();
         if (typeof color === "string")
             doc.stages[idx].color = color.trim();
         if (typeof order === "number" && order >= 1)
             doc.stages[idx].order = order;
-        // إعادة الترتيب 1..N
+        if (Array.isArray(allowedRoles)) {
+            const mapped = allowedRoles.map((r) => {
+                if (!isValidObjectId(String(r)))
+                    throw new Error("ObjectId invalide dans allowedRoles.");
+                return new mongoose_1.default.Types.ObjectId(String(r));
+            });
+            doc.stages[idx].allowedRoles = mapped;
+        }
+        // Reorder 1..N
         doc.stages = [...doc.stages]
             .sort((a, b) => (a.order || 0) - (b.order || 0))
             .map((s, i) => ({ ...s, order: i + 1 }));
@@ -246,26 +263,27 @@ const updateStage = async (req, res) => {
 };
 exports.updateStage = updateStage;
 /**
- * removeStage:
- *  - يحذف المرحلة حسب الـ key
- *  - إن كانت مستخدمة داخل Cases: يعيد خطأ مع العدد، إلا لو force=true
- *  - force: يسحب المرجع من كل Case مناسب ويعدّل currentStageOrder + auditTrail
+ * removeStage by :stageId
+ * - If used in Cases: returns error with count unless force=true
+ * - If force=true: cleans up cases and adjusts currentStageOrder + delivery
  */
 const removeStage = async (req, res) => {
     try {
-        const { id, stageKey } = req.params;
+        const { id, stageId } = req.params;
         const { force } = req.query;
+        if (!isValidObjectId(stageId))
+            return res.status(400).json({ formErrors: ["stageId invalide."] });
         const doc = await MeasurementTypeModel_1.default.findById(id);
         if (!doc)
             return res.status(404).json({ formErrors: ["Type non trouvé."] });
-        const idx = doc.stages.findIndex((s) => s.key === stageKey);
+        const idx = doc.stages.findIndex((s) => String(s._id) === String(stageId));
         if (idx < 0)
             return res.status(404).json({ formErrors: ["Étape non trouvée."] });
-        const stageId = doc.stages[idx]._id;
+        const stageObjectId = doc.stages[idx]._id;
         const stageOrder = doc.stages[idx].order;
         const usedCount = await CaseModel_1.default.countDocuments({
             type: new mongoose_1.default.Types.ObjectId(id),
-            "stages.stage": stageId,
+            "stages.stage": stageObjectId,
         });
         if (usedCount > 0 && force !== "true") {
             return res.status(400).json({
@@ -274,31 +292,27 @@ const removeStage = async (req, res) => {
                 ],
             });
         }
-        // احذف من الـ type
+        // Remove from type
         doc.stages.splice(idx, 1);
-        // إعادة ترقيم 1..N
         doc.stages = doc.stages.map((s, i) => ({ ...s, order: i + 1 }));
         await doc.save();
         if (usedCount > 0) {
-            // نظّف الحالات المتأثرة: اسحب المرحلة من المصفوفة واضبط currentStageOrder
             const affected = await CaseModel_1.default.find({
                 type: new mongoose_1.default.Types.ObjectId(id),
-                "stages.stage": stageId,
+                "stages.stage": stageObjectId,
             });
             const now = new Date();
             for (const c of affected) {
-                // اسحب المرجع من stages
-                c.stages = c.stages.filter((s) => String(s.stage) !== String(stageId));
-                // عدّل currentStageOrder: إذا كان المؤشر على مرحلة بعد/يساوي المرحلة المحذوفة
+                // remove stage ref from case
+                c.stages = c.stages.filter((s) => String(s.stage) !== String(stageObjectId));
+                // adjust currentStageOrder
                 if ((c.currentStageOrder || 0) >= stageOrder) {
-                    // إجمالي مراحل النوع بعد الحذف
                     const totalAfter = doc.stages.length;
                     c.currentStageOrder = Math.min(c.currentStageOrder || 0, totalAfter);
                 }
-                // ضبط التسليم حسب الموضع الجديد
+                // delivery recalculation
                 const totalAfter = doc.stages.length;
                 if (totalAfter === 0) {
-                    // لا مراحل — ارجع التسليم لوضع افتراضي
                     c.delivery = { status: "pending" };
                 }
                 else if ((c.currentStageOrder || 0) >= totalAfter) {
@@ -313,12 +327,12 @@ const removeStage = async (req, res) => {
                     c.delivery.status = "pending";
                     c.delivery.date = undefined;
                 }
-                // أثر
+                // audit trail
                 c.auditTrail.push({
                     actorRole: "SYSTEM",
                     action: "stage_removed",
                     at: now,
-                    meta: { stageKey, stageId, reason: "force_delete_from_type" },
+                    meta: { stageId, reason: "force_delete_from_type" },
                 });
                 await c.save();
             }
@@ -330,3 +344,4 @@ const removeStage = async (req, res) => {
     }
 };
 exports.removeStage = removeStage;
+//# sourceMappingURL=MeasurementTypeController.js.map

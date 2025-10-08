@@ -115,3 +115,4 @@ const deleteRole = async (req, res) => {
     }
 };
 exports.deleteRole = deleteRole;
+//# sourceMappingURL=RoleController.js.map

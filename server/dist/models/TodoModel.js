@@ -47,3 +47,4 @@ const TodoSchema = new mongoose_1.Schema({
 TodoSchema.index({ title: "text", notes: "text" });
 TodoSchema.index({ createdBy: 1, done: 1, dueAt: 1 });
 exports.default = mongoose_1.default.model("todo", TodoSchema);
+//# sourceMappingURL=TodoModel.js.map

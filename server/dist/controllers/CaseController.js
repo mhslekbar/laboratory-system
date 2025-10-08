@@ -7,7 +7,11 @@ exports.removeAttachment = exports.addAttachment = exports.approveCase = exports
 const mongoose_1 = __importDefault(require("mongoose"));
 const CaseModel_1 = __importDefault(require("../models/CaseModel"));
 const MeasurementTypeModel_1 = __importDefault(require("../models/MeasurementTypeModel"));
-const fail = (res, code = 400, msg = "Erreur") => res.status(code).json({ error: msg });
+const UserModel_1 = __importDefault(require("../models/UserModel"));
+const fail = (res, code = 300, msg = "Erreur") => {
+    console.log("msg: ", msg);
+    return res.status(code).json({ error: msg });
+};
 /* ======================= Helpers ======================= */
 const toPosInt = (raw, def = 1, max = 1000000) => {
     const n = parseInt(String(raw ?? ""), 10);
@@ -17,6 +21,7 @@ const toPosInt = (raw, def = 1, max = 1000000) => {
 };
 // تحويل نص إلى ObjectId إن أمكن
 const asId = (v) => v && mongoose_1.default.isValidObjectId(v) ? new mongoose_1.default.Types.ObjectId(v) : undefined;
+const isValidObjectId = (v) => typeof v === "string" && mongoose_1.default.Types.ObjectId.isValid(v);
 // جلب تفاصيل المراحل ديناميكياً + populate (patient, doctor[user], type)
 const aggregateCaseWithStages = (match) => [
     { $match: match },
@@ -37,8 +42,6 @@ const aggregateCaseWithStages = (match) => [
             localField: "patient",
             foreignField: "_id",
             as: "patient",
-            // يمكنك استخدام pipeline لو أردت تقليص الحقول:
-            // pipeline: [{ $project: { name: 1, phone: 1 } }],
         },
     },
     { $unwind: { path: "$patient", preserveNullAndEmptyArrays: true } },
@@ -49,7 +52,6 @@ const aggregateCaseWithStages = (match) => [
             localField: "doctor",
             foreignField: "_id",
             as: "doctor",
-            // pipeline: [{ $project: { username: 1, fullName: 1 } }],
         },
     },
     { $unwind: { path: "$doctor", preserveNullAndEmptyArrays: true } },
@@ -81,11 +83,11 @@ const aggregateCaseWithStages = (match) => [
                                 startedAt: "$$cs.startedAt",
                                 completedAt: "$$cs.completedAt",
                                 assignedTo: "$$cs.assignedTo",
-                                // قيم العرض من القالب
-                                key: "$$tpl.key",
+                                // قيم العرض من القالب (بدون key، مع allowedRoles)
                                 name: "$$tpl.name",
                                 order: "$$tpl.order",
                                 color: "$$tpl.color",
+                                allowedRoles: "$$tpl.allowedRoles",
                             },
                         },
                     },
@@ -96,7 +98,7 @@ const aggregateCaseWithStages = (match) => [
     // إحذف mt المؤقتة من الخرج
     { $project: { mt: 0 } },
 ];
-// البحث بالنص q على code و أسماء/مفاتيح المراحل (يتطلب ما بعد $lookup)
+// البحث بالنص q على code و أسماء المراحل (لا يوجد stages.key بعد الآن)
 const buildSearchMatch = (q) => {
     const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
     return {
@@ -106,20 +108,11 @@ const buildSearchMatch = (q) => {
             { "patient.phone": rx },
             { "doctor.username": rx },
             { "doctor.fullName": rx },
-            { "type.key": rx },
+            { "type.key": rx }, // نوع القياس ما زال لديه key
             { "type.name": rx },
-            { "stages.key": rx },
             { "stages.name": rx },
         ],
     };
-};
-// حل stageId من stageKey بالرجوع لقالب النوع
-const resolveStageIdByKey = async (typeId, key) => {
-    const mt = await MeasurementTypeModel_1.default.findById(typeId).lean();
-    if (!mt)
-        return undefined;
-    const tpl = (mt.stages || []).find((s) => s.key === key);
-    return tpl?._id;
 };
 // مولد كود بسيط (استبدله بعدّاد مركزي عند الحاجة)
 async function nextCaseCode() {
@@ -148,7 +141,6 @@ const listCases = async (req, res) => {
             match["delivery.status"] = String(status);
         const pipeline = [
             ...aggregateCaseWithStages(match),
-            // تطبيق البحث النصي بعد الإثراء
             ...(q ? [{ $match: buildSearchMatch(q) }] : []),
             { $sort: { createdAt: -1 } },
             { $skip: skip },
@@ -188,7 +180,7 @@ const getCaseById = async (req, res) => {
     try {
         const _id = asId(req.params.id);
         if (!_id)
-            return fail(res, 400, "ID invalide");
+            return fail(res, 300, "ID invalide");
         const rows = await CaseModel_1.default.aggregate(aggregateCaseWithStages({ _id }));
         const c = rows[0];
         if (!c)
@@ -208,10 +200,10 @@ const createCase = async (req, res) => {
     try {
         const { code, doctor, patient, type, note } = req.body || {};
         if (!doctor || !patient || !type)
-            return fail(res, 400, "doctor, patient, type requis");
+            return fail(res, 300, "doctor, patient, type requis");
         const typeDoc = await MeasurementTypeModel_1.default.findById(type).lean();
         if (!typeDoc)
-            return fail(res, 400, "Type introuvable");
+            return fail(res, 300, "Type introuvable");
         const stages = (typeDoc.stages || [])
             .slice()
             .sort((a, b) => (a.order || 0) - (b.order || 0))
@@ -231,12 +223,10 @@ const createCase = async (req, res) => {
             caseApproval: { approved: false },
             auditTrail: [{ action: "create", actorRole: "LAB", at: now, meta: { code: caseCode } }],
         });
-        // أعِد الوثيقة مُثرّاة
         const rows = await CaseModel_1.default.aggregate(aggregateCaseWithStages({ _id: created._id }));
         return res.status(201).json({ success: rows[0] });
     }
     catch (e) {
-        console.log("e: ", e);
         return fail(res, 500, "Création impossible");
     }
 };
@@ -279,62 +269,84 @@ const deleteCase = async (req, res) => {
 exports.deleteCase = deleteCase;
 /* =========================================================
    POST /api/cases/:id/advance
-   body: { toOrder?, toStageId?, toKey?, status? }
+   body: { toOrder?, toStageId?, status?, asRoleId? }
    - يحرك المؤشر إلى مرحلة مستهدفة
    - يحدّث حالات المراحل المحيطة
    - يضبط حالة التسليم وفق الموضع
+   - إذا أرسلت asRoleId: يتحقق من السماح في allowedRoles للمرحلة المستهدفة
 ========================================================= */
 const advanceStage = async (req, res) => {
     try {
-        const { toOrder, toStageId, toKey, status } = req.body || {};
+        const userId = req.user?._id;
+        const { toOrder, toStageId, status } = req.body || {};
+        if (!userId)
+            return fail(res, 401, "Non authentifié");
+        // 1) Charger l'utilisateur et normaliser ses rôles -> tableau de strings
+        const user = await UserModel_1.default.findById(userId).select("_id role roles").lean();
+        if (!user)
+            return fail(res, 401, "Utilisateur introuvable");
+        const userRoleIds = user.roles?.map((r) => String(r));
+        if (userRoleIds.length === 0)
+            return fail(res, 403, "Aucun rôle associé à l’utilisateur");
+        // 2) Charger le dossier + type
         const c = await CaseModel_1.default.findById(req.params.id).lean();
         if (!c)
             return fail(res, 404, "Dossier introuvable");
         if (!Array.isArray(c.stages) || c.stages.length === 0)
-            return fail(res, 400, "Aucune étape");
-        // حدّد order الهدف
+            return fail(res, 300, "Aucune étape");
+        const mt = await MeasurementTypeModel_1.default.findById(c.type).lean();
+        if (!mt)
+            return fail(res, 300, "Type introuvable");
+        const total = (mt.stages || []).length;
+        if (!total)
+            return fail(res, 300, "Type sans étapes");
+        // 3) Déterminer l’étape cible (order + _id)
         let targetOrder;
+        let targetStageIdStr;
         if (typeof toOrder === "number") {
             targetOrder = toOrder;
+            const foundByOrder = (mt.stages || []).find((s) => s.order === toOrder);
+            if (foundByOrder)
+                targetStageIdStr = String(foundByOrder._id);
         }
-        else if (toStageId && mongoose_1.default.isValidObjectId(toStageId)) {
-            // حوّل stageId -> order عبر نوع القياس
-            const mt = await MeasurementTypeModel_1.default.findById(c.type).lean();
-            const idx = (mt?.stages || []).find((s) => String(s._id) === String(toStageId))?.order;
-            if (typeof idx === "number")
-                targetOrder = idx;
-        }
-        else if (toKey) {
-            const mt = await MeasurementTypeModel_1.default.findById(c.type).lean();
-            const idx = (mt?.stages || []).find((s) => s.key === toKey)?.order;
-            if (typeof idx === "number")
-                targetOrder = idx;
+        else if (toStageId && isValidObjectId(toStageId)) {
+            const found = (mt.stages || []).find((s) => String(s._id) === String(toStageId));
+            if (found) {
+                targetOrder = found.order;
+                targetStageIdStr = String(found._id);
+            }
         }
         if (typeof targetOrder !== "number") {
-            // افتراضي: المرحلة التالية
-            const mt = await MeasurementTypeModel_1.default.findById(c.type).lean();
-            const total = (mt?.stages || []).length;
-            targetOrder = Math.min((c.currentStageOrder || 0) + 1, total);
+            // défaut : étape suivante
+            const next = Math.min((c.currentStageOrder || 0) + 1, total);
+            targetOrder = next;
+            const foundByOrder = (mt.stages || []).find((s) => s.order === next);
+            if (foundByOrder)
+                targetStageIdStr = String(foundByOrder._id);
         }
-        // تحقق من الحدود
-        const mt = await MeasurementTypeModel_1.default.findById(c.type).lean();
-        const total = (mt?.stages || []).length;
-        if (!total)
-            return fail(res, 400, "Type sans étapes");
-        if (targetOrder < 1 || targetOrder > total)
-            return fail(res, 400, `Ordre cible invalide (1..${total})`);
-        // ابنِ خريطة order -> stageId لتحديث مصفوفة stages
+        if (!targetOrder || targetOrder < 1 || targetOrder > total) {
+            return fail(res, 300, `Ordre cible invalide (1..${total})`);
+        }
+        // 4) RBAC : allowedRoles vide/absent => accès ouvert. Sinon, intersection avec les rôles de l'utilisateur.
+        const targetTpl = (mt.stages || []).find((s) => s.order === targetOrder);
+        if (!targetTpl)
+            return fail(res, 300, "Étape cible introuvable");
+        const allowed = Array.isArray(targetTpl.allowedRoles)
+            ? targetTpl.allowedRoles.map((r) => String(r))
+            : [];
+        if (allowed.length > 0) {
+            const allowedForUser = allowed.some((r) => userRoleIds.includes(String(r)));
+            console.log("allowedForUser: ", allowedForUser);
+            if (!allowedForUser)
+                return fail(res, 403, "Rôle non autorisé pour cette étape");
+        }
+        // 5) Construire la nouvelle liste de stages (statuts)
         const orderToId = new Map();
         (mt.stages || []).forEach((s) => orderToId.set(s.order, String(s._id)));
         const now = new Date();
         const prevOrder = c.currentStageOrder || 0;
-        // حدّث المصفوفة حسب order:
-        // - قبل target: done
-        // - بعد target: pending
-        // - target: status (in_progress افتراضياً إن لم يُمرّر)
         const newStages = c.stages.map((row) => {
             const stgId = String(row.stage);
-            // احصل على order لهذه المرحلة
             const ord = [...orderToId.entries()].find(([, id]) => id === stgId)?.[0];
             if (!ord)
                 return row;
@@ -364,7 +376,7 @@ const advanceStage = async (req, res) => {
                 };
             }
         });
-        // ضبط حالة التسليم حسب الموضع (توافقاً مع enum: pending | scheduled | delivered | returned)
+        // 6) Livraison (pending/scheduled/delivered)
         const delivery = c.delivery || { status: "pending" };
         if (targetOrder === total) {
             delivery.status = "delivered";
@@ -378,6 +390,7 @@ const advanceStage = async (req, res) => {
             delivery.status = "pending";
             delivery.date = undefined;
         }
+        // 7) Sauvegarde + audit
         const updated = await CaseModel_1.default.findByIdAndUpdate(req.params.id, {
             $set: {
                 stages: newStages,
@@ -392,14 +405,14 @@ const advanceStage = async (req, res) => {
                     meta: {
                         from: prevOrder,
                         to: targetOrder,
-                        by: toStageId
-                            ? { type: "stageId", value: toStageId }
-                            : toKey
-                                ? { type: "key", value: toKey }
-                                : toOrder
-                                    ? { type: "order", value: toOrder }
-                                    : { type: "autoNext", value: prevOrder + 1 },
+                        by: targetStageIdStr ? { type: "stageId", value: targetStageIdStr } : { type: "order", value: targetOrder },
                         statusOverride: status || null,
+                        actorUser: String(userId),
+                        actorRoles: userRoleIds,
+                        rbac: {
+                            allowedRolesOnStage: allowed, // vide => ouvert
+                            granted: allowed.length === 0 || allowed.some((r) => userRoleIds.includes(String(r))),
+                        },
                     },
                 },
             },
@@ -413,29 +426,51 @@ const advanceStage = async (req, res) => {
 };
 exports.advanceStage = advanceStage;
 /* =========================================================
-   POST /api/cases/:id/stages/:stageIdOrKey/status
-   body: { status, note? }
-   - يدعم :stageIdOrKey كـ ObjectId أو key
+   POST /api/cases/:id/stages/:stageId/status
+   body: { status, note?, asRoleId? }
+   - :stageId يجب أن يكون ObjectId صالح
+   - إذا أرسلت asRoleId: يتحقق من السماح في allowedRoles للمرحلة
 ========================================================= */
 const setStageStatus = async (req, res) => {
     try {
-        const { status, note } = req.body;
+        const { status, note } = req.body || {};
         if (!status)
-            return fail(res, 400, "status requis");
+            return fail(res, 300, "status requis");
+        const rawStageId = req.params.stageId;
+        if (!isValidObjectId(rawStageId))
+            return fail(res, 300, "stageId invalide");
+        // --- Auth & rôles utilisateur
+        const userId = req.user?._id;
+        if (!userId)
+            return fail(res, 401, "Non authentifié");
+        const user = await UserModel_1.default.findById(userId).select("_id role roles").lean();
+        if (!user)
+            return fail(res, 401, "Utilisateur introuvable");
+        const userRoleIds = user.roles?.filter(Boolean)
+            .map((r) => String(r));
+        if (userRoleIds.length === 0)
+            return fail(res, 403, "Aucun rôle associé à l’utilisateur");
+        // --- Charger le dossier et le type
         const c = await CaseModel_1.default.findById(req.params.id).lean();
         if (!c)
             return fail(res, 404, "Dossier introuvable");
-        let stageId;
-        const raw = req.params.stageIdOrKey;
-        if (mongoose_1.default.isValidObjectId(raw)) {
-            stageId = new mongoose_1.default.Types.ObjectId(raw);
+        const mt = await MeasurementTypeModel_1.default.findById(c.type).lean();
+        if (!mt)
+            return fail(res, 300, "Type introuvable");
+        const stageId = new mongoose_1.default.Types.ObjectId(rawStageId);
+        const tpl = (mt.stages || []).find((s) => String(s._id) === String(stageId));
+        if (!tpl)
+            return fail(res, 404, "Étape introuvable");
+        // --- RBAC: allowedRoles vide/absent => accès ouvert, sinon intersection avec userRoleIds
+        const allowed = Array.isArray(tpl.allowedRoles)
+            ? tpl.allowedRoles.map((r) => String(r))
+            : [];
+        if (allowed.length > 0) {
+            const allowedForUser = allowed.some((r) => userRoleIds.includes(String(r)));
+            if (!allowedForUser)
+                return fail(res, 403, "Rôle non autorisé pour cette étape");
         }
-        else {
-            // حوّل key -> id
-            stageId = await resolveStageIdByKey(c.type, raw);
-            if (!stageId)
-                return fail(res, 404, "Étape (par key) introuvable");
-        }
+        // --- Patch du statut
         const now = new Date();
         const patched = c.stages.map((row) => {
             if (String(row.stage) !== String(stageId))
@@ -454,7 +489,7 @@ const setStageStatus = async (req, res) => {
                 next.completedAt = undefined;
             }
             if (note !== undefined)
-                next.note = note; // إن كان لديك حقل note على مستوى المرحلة
+                next.note = note; // si tu as un champ note au niveau de la ligne stage
             return next;
         });
         const updated = await CaseModel_1.default.findByIdAndUpdate(req.params.id, {
@@ -464,7 +499,17 @@ const setStageStatus = async (req, res) => {
                     at: now,
                     actorRole: "LAB",
                     action: "stage_status",
-                    meta: { stage: String(stageId), status },
+                    meta: {
+                        stage: String(stageId),
+                        status,
+                        note: note ?? null,
+                        actorUser: String(userId),
+                        actorRoles: userRoleIds,
+                        rbac: {
+                            allowedRolesOnStage: allowed, // vide => ouvert
+                            granted: allowed.length === 0 || allowed.some((r) => userRoleIds.includes(String(r))),
+                        },
+                    },
                 },
             },
         }, { new: true });
@@ -484,7 +529,7 @@ const setDeliveryStatus = async (req, res) => {
     try {
         const { status, date } = req.body || {};
         if (!status)
-            return fail(res, 400, "status requis");
+            return fail(res, 300, "status requis");
         const patch = { "delivery.status": status };
         if (date !== undefined)
             patch["delivery.date"] = date ? new Date(date) : undefined;
@@ -503,32 +548,111 @@ exports.setDeliveryStatus = setDeliveryStatus;
    POST /api/cases/:id/approve
    body: { approved: boolean, by?: userId, note?: string }
 ========================================================= */
+// export const approveCase = async (req: Request, res: Response) => {
+//   try {
+//     const { approved, by, note } = req.body || {};
+//     const now = new Date();
+//     const c = await CaseModel.findByIdAndUpdate(
+//       req.params.id,
+//       {
+//         $set: {
+//           "caseApproval.approved": !!approved,
+//           "caseApproval.by": by ? asId(String(by)) : undefined,
+//           "caseApproval.at": approved ? now : undefined,
+//           "caseApproval.note": note,
+//         },
+//         $push: {
+//           auditTrail: {
+//             at: now,
+//             actorRole: "LAB",
+//             action: "approve",
+//             meta: { approved: !!approved, by: by || null },
+//           },
+//         },
+//       },
+//       { new: true }
+//     );
+//     if (!c) return fail(res, 404, "Dossier introuvable");
+//     const rows = await CaseModel.aggregate(aggregateCaseWithStages({ _id: c._id }));
+//     return res.status(200).json({ success: rows[0] });
+//   } catch {
+//     return fail(res, 500, "Approbation impossible");
+//   }
+// };
 const approveCase = async (req, res) => {
     try {
         const { approved, by, note } = req.body || {};
         const now = new Date();
-        const c = await CaseModel_1.default.findByIdAndUpdate(req.params.id, {
-            $set: {
-                "caseApproval.approved": !!approved,
-                "caseApproval.by": by ? asId(String(by)) : undefined,
-                "caseApproval.at": approved ? now : undefined,
-                "caseApproval.note": note,
-            },
+        // 1) Récupération du dossier
+        const existing = await CaseModel_1.default.findById(req.params.id).lean();
+        if (!existing)
+            return fail(res, 404, "Dossier introuvable");
+        const stages = Array.isArray(existing.stages) ? existing.stages : [];
+        const allDone = stages.length === 0
+            ? true
+            : stages.every((s) => String(s?.status).toLowerCase() === "done" && !!s?.completedAt);
+        // 2) Préparer la mise à jour des étapes si nécessaire
+        let stagesUpdate;
+        let actorRole = "LAB";
+        if (!allDone) {
+            actorRole = "DOCTOR"; // "Médecin" si on force la complétion
+            stagesUpdate = stages.map((s) => {
+                const completedAt = s.completedAt ? new Date(s.completedAt) : now;
+                const startedAt = s.startedAt ? new Date(s.startedAt) : completedAt;
+                return {
+                    ...s,
+                    status: "done",
+                    startedAt,
+                    completedAt,
+                };
+            });
+        }
+        else {
+            actorRole = "LAB"; // tout était déjà done
+        }
+        // 3) Auto "delivered" si approved et non "returned"
+        const deliverySet = {};
+        const currentDelivery = String(existing?.delivery?.status || "").toLowerCase();
+        if (approved && currentDelivery !== "returned") {
+            deliverySet["delivery.status"] = "delivered";
+            if (!existing?.delivery?.date)
+                deliverySet["delivery.date"] = now;
+        }
+        // 4) Build $set
+        const set = {
+            currentStageOrder: stages.length,
+            "caseApproval.approved": !!approved,
+            "caseApproval.note": note,
+            "caseApproval.at": approved ? now : null,
+            ...(by ? { "caseApproval.by": asId(String(by)) } : {}),
+            ...(stagesUpdate ? { stages: stagesUpdate } : {}),
+            ...deliverySet,
+        };
+        // 5) Update + audit
+        const updated = await CaseModel_1.default.findByIdAndUpdate(existing._id, {
+            $set: set,
             $push: {
                 auditTrail: {
                     at: now,
-                    actorRole: "LAB",
+                    actorRole, // "DOCTOR" si auto-completion, sinon "LAB"
                     action: "approve",
-                    meta: { approved: !!approved, by: by || null },
+                    meta: {
+                        approved: !!approved,
+                        by: by || null,
+                        stagesAutoCompleted: !allDone,
+                        stagesCount: stages.length,
+                        deliveryAutoUpdated: !!deliverySet["delivery.status"],
+                    },
                 },
             },
         }, { new: true });
-        if (!c)
+        if (!updated)
             return fail(res, 404, "Dossier introuvable");
-        const rows = await CaseModel_1.default.aggregate(aggregateCaseWithStages({ _id: c._id }));
+        const rows = await CaseModel_1.default.aggregate(aggregateCaseWithStages({ _id: updated._id }));
         return res.status(200).json({ success: rows[0] });
     }
-    catch {
+    catch (err) {
+        console.error("approveCase error:", err);
         return fail(res, 500, "Approbation impossible");
     }
 };
@@ -542,7 +666,7 @@ const addAttachment = async (req, res) => {
     try {
         const { url, name, mime, size, uploadedBy } = req.body || {};
         if (!url)
-            return fail(res, 400, "URL requise");
+            return fail(res, 300, "URL requise");
         const doc = await CaseModel_1.default.findByIdAndUpdate(req.params.id, {
             $push: {
                 attachments: {
@@ -572,7 +696,7 @@ const removeAttachment = async (req, res) => {
     try {
         const attachmentId = req.params.attachmentId;
         if (!mongoose_1.default.isValidObjectId(attachmentId))
-            return fail(res, 400, "attachmentId invalide");
+            return fail(res, 300, "attachmentId invalide");
         const c = await CaseModel_1.default.findByIdAndUpdate(req.params.id, { $pull: { attachments: { _id: new mongoose_1.default.Types.ObjectId(attachmentId) } } }, { new: true });
         if (!c)
             return fail(res, 404, "Dossier introuvable");
@@ -584,3 +708,4 @@ const removeAttachment = async (req, res) => {
     }
 };
 exports.removeAttachment = removeAttachment;
+//# sourceMappingURL=CaseController.js.map

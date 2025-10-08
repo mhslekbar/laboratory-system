@@ -15,3 +15,4 @@ PermissionRoute.put("/:id", PermissionController_1.updatePermission);
 PermissionRoute.delete("/:id", PermissionController_1.deletePermission);
 PermissionRoute.delete("/", PermissionController_1.deleteAllPermission);
 exports.default = PermissionRoute;
+//# sourceMappingURL=permission.js.map

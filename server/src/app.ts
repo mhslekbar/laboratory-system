@@ -8,7 +8,7 @@ import fs from "fs";
 import { connectDB, closeDB } from "./config/db";
 
 // Middlewares (ces fichiers sont en-dehors de src/ chezك)
-import { corsPreflight, securityMiddlewares } from "../middlewares/security";
+import { securityMiddlewares } from "../middlewares/security";
 import { requestId, morganLogger } from "../middlewares/requestId";
 import { notFound, errorHandler } from "../middlewares/error";
 import { verifyToken } from "../middlewares/verifyToken";
@@ -27,6 +27,7 @@ import TodoRoute from "../routes/todo";
 import SettingsRoute from "../routes/settings";
 import uploadsRoute from "../routes/uploads";
 import doctorRoutes from "../routes/doctor";
+import { corsPreflight } from "./config/corsOptions";
 
 export async function buildApp() {
   await connectDB();

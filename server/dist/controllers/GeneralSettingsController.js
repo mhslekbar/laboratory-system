@@ -35,3 +35,4 @@ const putGeneralSettings = async (req, res) => {
     }
 };
 exports.putGeneralSettings = putGeneralSettings;
+//# sourceMappingURL=GeneralSettingsController.js.map

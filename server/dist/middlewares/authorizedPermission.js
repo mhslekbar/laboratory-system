@@ -64,3 +64,4 @@ const authorizedPermission = (requiredPerms = [], collection) => {
     };
 };
 exports.authorizedPermission = authorizedPermission;
+//# sourceMappingURL=authorizedPermission.js.map
