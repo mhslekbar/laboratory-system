@@ -39,7 +39,7 @@ const UPLOADS_DIR = get("UPLOADS_DIR", path_1.default.join(PUBLIC_DIR, "uploads"
 exports.env = {
     NODE_ENV,
     isProd: NODE_ENV === "production",
-    PORT: getNum("PORT", 3052),
+    PORT: getNum("PORT", 3062),
     MONGO_URI: NODE_ENV === "production" ? get("MONGO_URI", "mongodb+srv://sniper:1212@cluster0.p4xc21i.mongodb.net/lab_system?retryWrites=true&w=majority") : get("MONGO_URI", "mongodb://127.0.0.1:27017/lab_system"),
     JWT_SEC: get("JWT_SEC", ""),
     JWT_REFRESH_SEC: get("JWT_REFRESH_SEC", ""),

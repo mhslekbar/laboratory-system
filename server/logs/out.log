@@ -10418,3 +10418,22 @@
 2025-10-08T03:23:44:     at signAccessToken (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\controllers\AuthController.ts:9:7)
 2025-10-08T03:23:44:     at login (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\controllers\AuthController.ts:97:25)
 2025-10-08T03:23:44: 84556cf6-4c25-4e4c-af19-8be86a924d39 POST /api/auth/login 500 46 - 171.228 ms
+2025-10-08T22:25:29: ✅ Mongo connected (db: lab_system)
+2025-10-08T22:25:29: Running in development mode
+2025-10-08T22:25:29: 🚀 API listening on http://localhost:3062 (env=development)
+2025-10-08T22:40:02: ✅ Mongo connected (db: lab_system)
+2025-10-08T22:40:02: Running in development mode
+2025-10-08T22:40:02: 🚀 API listening on http://localhost:3062 (env=development)
+2025-10-08T22:40:26: ✅ Mongo connected (db: lab_system)
+2025-10-08T22:40:26: Running in development mode
+2025-10-08T22:40:26: 🚀 API listening on http://localhost:3062 (env=development)
+2025-10-08T22:41:30: ✅ Mongo connected (db: lab_system)
+2025-10-08T22:41:31: Running in development mode
+2025-10-08T22:41:31: 🚀 API listening on http://localhost:3062 (env=development)
+2025-10-08T22:45:19: ✅ Mongo connected (db: lab_system)
+2025-10-08T22:45:19: Running in development mode
+2025-10-08T22:45:19: 🚀 API listening on http://localhost:3062 (env=development)
+2025-10-08T22:55:42: 2906bc87-2d89-49fb-9b6a-468b0063fb60 GET / 404 21 - 26.357 ms
+2025-10-08T22:56:11: 261df22f-7073-47de-a5ad-47079256cffd GET /api/ping 404 21 - 2.655 ms
+2025-10-08T22:56:35: 864c4211-b4d1-4f41-b151-16732f022bcd POST /api/auth/login 300 41 - 49.283 ms
+2025-10-08T22:57:12: cb9e97a7-5adc-4186-a716-5f02931d39b9 POST /api/auth/login 200 7333 - 195.362 ms

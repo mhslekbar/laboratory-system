@@ -2,6 +2,8 @@
 import { CorsOptions } from "cors";
 
 const allowedOrigins = [
+  "http://localhost:3061",
+  "http://127.0.0.1:3061",
   "https://medepratlab.com",
   "https://www.medepratlab.com",
 ];

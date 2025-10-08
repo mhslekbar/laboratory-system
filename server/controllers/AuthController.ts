@@ -93,7 +93,6 @@ export const login = async (req: Request, res: Response) => {
       return res.status(300).json({ formErrors : ["Identifiants invalides"] });
     }
 
-      console.log("User logged in: ", user);
     const accessToken = signAccessToken(user._id.toString());
     const refreshToken = signRefreshToken(user._id?.toString());
 

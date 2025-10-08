@@ -5,7 +5,7 @@ import buildApp from "./app";
 (async () => {
   try {
     const app = await buildApp();
-    const port = env.PORT || 3052;
+    const port = env.PORT || 3062;
 
     const server = app.listen(port, () => {
       console.log(`🚀 API listening on http://localhost:${port} (env=${env.NODE_ENV})`);

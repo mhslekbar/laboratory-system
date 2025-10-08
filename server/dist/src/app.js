@@ -29,6 +29,7 @@ const todo_1 = __importDefault(require("../routes/todo"));
 const settings_1 = __importDefault(require("../routes/settings"));
 const uploads_1 = __importDefault(require("../routes/uploads"));
 const doctor_1 = __importDefault(require("../routes/doctor"));
+const corsOptions_1 = require("./config/corsOptions");
 async function buildApp() {
     await (0, db_1.connectDB)();
     const app = (0, express_1.default)();
@@ -38,7 +39,7 @@ async function buildApp() {
     app.use(requestId_1.requestId);
     app.use(requestId_1.morganLogger);
     // Preflight early
-    app.options("*", security_1.corsPreflight);
+    app.options("*", corsOptions_1.corsPreflight);
     // Security stack (helmet, cors, rate limit, sanitize query-strings)
     app.use(...(0, security_1.securityMiddlewares)());
     // Sanitize Mongo operators in body/query

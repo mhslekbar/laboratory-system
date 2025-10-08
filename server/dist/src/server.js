@@ -9,7 +9,7 @@ const app_1 = __importDefault(require("./app"));
 (async () => {
     try {
         const app = await (0, app_1.default)();
-        const port = env_1.default.PORT || 3052;
+        const port = env_1.default.PORT || 3062;
         const server = app.listen(port, () => {
             console.log(`🚀 API listening on http://localhost:${port} (env=${env_1.default.NODE_ENV})`);
         });
