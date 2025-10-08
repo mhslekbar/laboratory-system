@@ -1,10 +1,13 @@
 // src/requestMethods.ts
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
-const port = "3052";
 export const companyName: any = "lab_system";
-export const hostName = `http://localhost:${port}/`;
+// const API_PORT = "3062";
+// export const hostName = `http://localhost:${API_PORT}/`;
 // export const hostName = `https://api.medepratlab.com/`;
+
+export const hostName =
+  process.env.REACT_APP_API_URL || "http://localhost:3062";
 
 const BASE_URL = `${hostName}api/`;
 
