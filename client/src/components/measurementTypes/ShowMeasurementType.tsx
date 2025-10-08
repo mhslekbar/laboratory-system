@@ -149,7 +149,7 @@ const ShowMeasurementType: React.FC = () => {
       {/* Modales */}
       <CreateMeasurementType open={createOpen} onClose={() => setCreateOpen(false)} />
       <UpdateMeasurementType open={!!editOpen} onClose={() => setEditOpen(null)} value={editOpen} />
-      <DeleteMeasurementType open={!!deleteOpen} onClose={() => setDeleteOpen(null)} id={deleteOpen?._id} name={deleteOpen?.name} />
+      <DeleteMeasurementType open={!!deleteOpen} onClose={() => setDeleteOpen(null)} id={(deleteOpen as any)?._id} name={deleteOpen?.name} />
     </div>
   );
 };

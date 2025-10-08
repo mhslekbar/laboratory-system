@@ -32,10 +32,9 @@ const IconBtn: React.FC<
   );
 };
 
-const StagePill: React.FC<{ name: string; order: number; keyStr?: string; color?: string }> = ({
+const StagePill: React.FC<{ name: string; order: number; color?: string }> = ({
   name,
   order,
-  keyStr,
   color,
 }) => (
   <span className="inline-flex items-center gap-2 px-2 py-1 rounded-full border shadow-sm bg-white">
@@ -45,7 +44,7 @@ const StagePill: React.FC<{ name: string; order: number; keyStr?: string; color?
       aria-hidden
     />
     <span className="text-xs">
-      {order}. {name} {keyStr ? <span className="opacity-60">({keyStr})</span> : null}
+      {order}. {name}
     </span>
   </span>
 );
@@ -80,7 +79,7 @@ const TableMeasurementType: React.FC<Props> = ({ items, onEdit, onDelete }) => {
                   const stages = row?.stages || [];
                   return (
                     <tr
-                      key={row._id || row.key}
+                      key={(row as any)._id || row.key}
                       className="bg-white even:bg-gray-50 hover:bg-gray-100/70 transition-colors"
                     >
                       {/* Clé */}
@@ -99,12 +98,11 @@ const TableMeasurementType: React.FC<Props> = ({ items, onEdit, onDelete }) => {
                           <span className="text-xs text-gray-500">Aucune étape</span>
                         ) : (
                           <div className="flex flex-wrap gap-2">
-                            {stages.map((s) => (
+                            {stages.map((s, i) => (
                               <StagePill
-                                key={s.key}
+                                key={s._id || `${row.key}-${i}`}
                                 name={safe(s.name)}
                                 order={Number(s.order ?? 0)}
-                                keyStr={safe(s.key)}
                                 color={s.color}
                               />
                             ))}
@@ -161,7 +159,7 @@ const TableMeasurementType: React.FC<Props> = ({ items, onEdit, onDelete }) => {
         {items.map((row) => {
           const stages = row?.stages || [];
           return (
-            <div key={row._id || row.key} className="rounded-2xl border p-4 shadow-sm bg-white">
+            <div key={(row as any)._id || row.key} className="rounded-2xl border p-4 shadow-sm bg-white">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-[11px] uppercase tracking-wide text-gray-500">Clé</div>
@@ -195,9 +193,9 @@ const TableMeasurementType: React.FC<Props> = ({ items, onEdit, onDelete }) => {
                   <div className="text-xs text-gray-500">Aucune étape</div>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {stages.map((s) => (
+                    {stages.map((s, i) => (
                       <span
-                        key={s.key}
+                        key={s._id || `${row.key}-${i}`}
                         className="inline-flex items-center gap-2 px-2 py-1 rounded-full border shadow-sm"
                       >
                         <span
@@ -205,8 +203,7 @@ const TableMeasurementType: React.FC<Props> = ({ items, onEdit, onDelete }) => {
                           style={{ background: s.color || "#cbd5e1" }}
                         />
                         <span className="text-[11px]">
-                          {Number(s.order ?? 0)}. {safe(s.name)}{" "}
-                          <span className="opacity-60">({safe(s.key)})</span>
+                          {Number(s.order ?? 0)}. {safe(s.name)}
                         </span>
                       </span>
                     ))}

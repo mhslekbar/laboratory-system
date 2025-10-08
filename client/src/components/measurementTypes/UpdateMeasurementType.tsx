@@ -1,14 +1,16 @@
 // components/measurementTypes/UpdateMeasurementType.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import InputsMeasurementTypes from "./forms/InputsMeasurementTypes";
-import { MeasurementTypeDto, StageTemplate } from "./types";
-import { useDispatch, useSelector } from "react-redux";
+import RoleCheckboxList from "./parts/RoleCheckboxList";
+import type { MeasurementTypeDto, StageTemplate } from "../../redux/measurementTypes/api";
+import { useDispatch } from "react-redux";
 import { State } from "../../redux/store";
 import { fetchMeasurementTypes, updateMeasurementType } from "../../redux/measurementTypes/thunks";
 import AddStage from "./cible/AddStage";
 import EditStage from "./cible/EditStage";
 import DeleteStage from "./cible/DeleteStage";
 import DuplicateStagesModal from "./DuplicateStagesModal";
+import { useSelector } from "react-redux";
 
 type Props = {
   open: boolean;
@@ -18,14 +20,19 @@ type Props = {
 
 const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
   const dispatch: any = useDispatch();
+
+  // Rôles depuis le store
+  const { roles } = useSelector((s: State) => (s as any).roles) as unknown as { roles: { _id: string; name: string }[] };
+
+  // Types pour duplication
   const { items: existingTypes } = useSelector((s: State) => (s as any).measurementTypes || { items: [] });
 
   const [editing, setEditing] = useState<MeasurementTypeDto>({ key: "", name: "", stages: [] });
   const [saving, setSaving] = useState(false);
 
   const [stageAddOpen, setStageAddOpen] = useState(false);
-  const [stageEditOpen, setStageEditOpen] = useState<{ open: boolean; stageKey?: string }>({ open: false });
-  const [stageDeleteOpen, setStageDeleteOpen] = useState<{ open: boolean; stageKey?: string }>({ open: false });
+  const [stageEditOpen, setStageEditOpen] = useState<{ open: boolean; stageId?: string }>({ open: false });
+  const [stageDeleteOpen, setStageDeleteOpen] = useState<{ open: boolean; stageId?: string }>({ open: false });
 
   // Duplication
   const [duplicateFromId, setDuplicateFromId] = useState<string>("");
@@ -36,23 +43,10 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
   }, [value]);
 
   useEffect(() => {
-    if (open && (!existingTypes || existingTypes.length === 0)) {
+    if (open && (!existingTypes || (existingTypes as any[]).length === 0)) {
       dispatch(fetchMeasurementTypes({ page: 1, limit: 100 }));
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // --- Vérification des doublons de clés d'étapes ---
-  const dupKeys = useMemo(() => {
-    const seen = new Set<string>();
-    const dups = new Set<string>();
-    (editing.stages || [])
-      .map(s => (s.key || "").trim())
-      .filter(Boolean)
-      .forEach(k => (seen.has(k) ? dups.add(k) : seen.add(k)));
-    return dups;
-  }, [editing.stages]);
-
-  const hasDuplicateStageKeys = dupKeys.size > 0;
 
   const normalizeOrder = (stages: StageTemplate[]) =>
     stages
@@ -62,13 +56,14 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
 
   const onSave = async () => {
     if (!editing.name.trim()) return alert("‘nom’ est obligatoire.");
-    if (hasDuplicateStageKeys) return alert("Clés d’étapes en double. Veuillez corriger avant d’enregistrer.");
 
     try {
       setSaving(true);
-      // on enregistre tel quel (le backend re-normalise aussi si besoin)
       const ok = await dispatch(
-        updateMeasurementType(value?._id!, { name: editing.name.trim(), stages: editing.stages })
+        updateMeasurementType(value?._id!, {
+          name: editing.name.trim(),
+          stages: editing.stages,
+        })
       );
       if (ok) {
         await dispatch(fetchMeasurementTypes());
@@ -80,7 +75,7 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
   };
 
   const moveStage = (idx: number, dir: -1 | 1) => {
-    setEditing(prev => {
+    setEditing((prev) => {
       const arr = [...(prev.stages || [])];
       const j = idx + dir;
       if (j < 0 || j >= arr.length) return prev;
@@ -89,17 +84,14 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
     });
   };
 
-
-  // --- Inline editing helpers ---
-  const updateStageField = (idx: number, field: keyof StageTemplate, value: string) => {
-    setEditing(prev => {
+  const updateStageField = (idx: number, field: keyof StageTemplate, value: any) => {
+    setEditing((prev) => {
       const arr = [...(prev.stages || [])];
       const next: StageTemplate = {
         ...arr[idx],
         [field]: field === "order" ? (value ? Number(value) : undefined) : value,
       } as StageTemplate;
       arr[idx] = next;
-      // si on touche à order, on re-normalise
       const out = field === "order" ? normalizeOrder(arr) : arr;
       return { ...prev, stages: out };
     });
@@ -110,20 +102,14 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
     () => (existingTypes || []).find((t: MeasurementTypeDto) => t._id === duplicateFromId) || null,
     [duplicateFromId, existingTypes]
   );
-  const excludeKeys = useMemo(
-    () => (editing.stages || []).map(s => s.key).filter(Boolean) as string[],
-    [editing.stages]
-  );
 
   const onConfirmDuplicate = (chosen: StageTemplate[]) => {
-    const existKeys = new Set((editing.stages || []).map(s => (s.key || "").trim()).filter(Boolean));
-    const merged = [...(editing.stages || [])];
-    chosen.forEach(s => { if (s.key && !existKeys.has(s.key)) merged.push({ ...s }); });
-    setEditing(prev => ({ ...prev, stages: normalizeOrder(merged) }));
+    const merged = [...(editing.stages || []), ...chosen.map((s) => ({ ...s, _id: undefined }))];
+    setEditing((prev) => ({ ...prev, stages: normalizeOrder(merged) }));
     setDupModalOpen(false);
   };
 
-    if (!open || !value) return null;
+  if (!open || !value) return null;
 
   return (
     <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/40 p-3">
@@ -136,7 +122,7 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
 
         {/* Body scrollable */}
         <div className="max-h-[75vh] overflow-y-auto p-5 space-y-6">
-          <InputsMeasurementTypes editing={editing} setEditing={setEditing} disabledKey />
+          <InputsMeasurementTypes editing={editing as any} setEditing={setEditing as any} disabledKey />
 
           {/* Duplication */}
           <div className="rounded-xl border p-3 bg-gray-50/60">
@@ -145,136 +131,141 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
                 <label className="text-xs font-medium mb-1">Dupliquer des étapes depuis…</label>
                 <select
                   value={duplicateFromId}
-                  onChange={(e)=>setDuplicateFromId(e.target.value)}
+                  onChange={(e) => setDuplicateFromId(e.target.value)}
                   className="h-11 rounded-xl border px-3"
                 >
                   <option value="">— Sélectionner un type —</option>
                   {(existingTypes || []).map((t: MeasurementTypeDto) => (
-                    <option key={t._id || t.key} value={t._id}>{t.name} — {t.key}</option>
+                    <option key={t._id || t.key} value={t._id}>
+                      {t.name} — {t.key}
+                    </option>
                   ))}
                 </select>
               </div>
               <button
-                onClick={()=>setDupModalOpen(true)}
+                onClick={() => setDupModalOpen(true)}
                 disabled={!duplicateFromId}
                 className="h-11 px-4 rounded-xl border bg-white hover:bg-gray-50 disabled:opacity-50"
               >
                 Sélectionner les étapes…
               </button>
-              <button
-                onClick={() => setStageAddOpen(true)}
-                className="h-11 px-4 rounded-xl border bg-white hover:bg-gray-50"
-              >
+              <button onClick={() => setStageAddOpen(true)} className="h-11 px-4 rounded-xl border bg-white hover:bg-gray-50">
                 Ajouter une étape
               </button>
             </div>
             <p className="mt-2 text-[11px] text-gray-500">
-              Choisissez précisément quelles étapes copier. Les clés déjà présentes seront ignorées.
+              Choisissez précisément quelles étapes copier. Elles seront ajoutées à la suite.
             </p>
           </div>
 
-          {/* Alerte doublons */}
-          {hasDuplicateStageKeys && (
-            <div className="rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              Attention : des clés d’étapes sont en double ({Array.from(dupKeys).join(", ")}). 
-              Chaque étape doit avoir une clé unique. Corrigez avant d’enregistrer.
-            </div>
-          )}
-
           {/* Table Étapes (édition inline) */}
-          <div className={`overflow-x-auto border rounded-2xl ${hasDuplicateStageKeys ? "ring-2 ring-rose-300" : ""}`}>
+          <div className={`overflow-x-auto border rounded-2xl`}>
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-3 py-2 w-24">Ordre</th>
-                  <th className="text-left px-3 py-2">Clé</th>
                   <th className="text-left px-3 py-2">Nom</th>
                   <th className="text-left px-3 py-2 w-48">Couleur</th>
+                  <th className="text-left px-3 py-2">Rôles autorisés</th>
                   <th className="text-right px-3 py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {editing.stages?.slice().sort((a,b)=>(a.order||0)-(b.order||0)).map((s, idx) => {
-                  const isDup = s.key && dupKeys.has((s.key || "").trim());
-                  return (
-                    <tr key={idx} className={`border-t ${isDup ? "bg-rose-50" : ""}`}>
-                      {/* Ordre + move */}
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min={1}
-                            value={s.order || idx + 1}
-                            onChange={(e)=>updateStageField(idx, "order", e.target.value)}
-                            className="h-9 w-20 rounded-xl border px-2"
-                          />
-                          <div className="flex flex-col gap-1">
-                            <button onClick={() => moveStage(idx, -1)} className="px-2 py-0.5 rounded border text-xs hover:bg-gray-50">↑</button>
-                            <button onClick={() => moveStage(idx, +1)} className="px-2 py-0.5 rounded border text-xs hover:bg-gray-50">↓</button>
+                {editing.stages
+                  ?.slice()
+                  .sort((a, b) => (a.order || 0) - (b.order || 0))
+                  .map((s, idx) => {
+                    return (
+                      <tr key={s._id || idx} className="border-t">
+                        {/* Ordre + move */}
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min={1}
+                              value={s.order || idx + 1}
+                              onChange={(e) => updateStageField(idx, "order", e.target.value)}
+                              className="h-9 w-20 rounded-xl border px-2"
+                            />
+                            <div className="flex flex-col gap-1">
+                              <button onClick={() => moveStage(idx, -1)} className="px-2 py-0.5 rounded border text-xs hover:bg-gray-50">
+                                ↑
+                              </button>
+                              <button onClick={() => moveStage(idx, +1)} className="px-2 py-0.5 rounded border text-xs hover:bg-gray-50">
+                                ↓
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Clé (editable) */}
-                      <td className="px-3 py-2">
-                        <input
-                          value={s.key}
-                          onChange={(e)=>updateStageField(idx, "key", e.target.value)}
-                          className={`h-9 rounded-xl border px-2 w-44 ${isDup ? "border-rose-400" : ""}`}
-                          placeholder="design / drill …"
-                        />
-                      </td>
-
-                      {/* Nom (editable) */}
-                      <td className="px-3 py-2">
-                        <input
-                          value={s.name}
-                          onChange={(e)=>updateStageField(idx, "name", e.target.value)}
-                          className="h-9 rounded-xl border px-2 w-44"
-                          placeholder="Libellé"
-                        />
-                      </td>
-
-                      {/* Couleur (editable) */}
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
+                        {/* Nom (editable) */}
+                        <td className="px-3 py-2">
                           <input
-                            type="color"
-                            value={s.color || "#2563eb"}
-                            onChange={(e)=>updateStageField(idx, "color", e.target.value)}
-                            className="h-9 w-16 rounded border"
+                            value={s.name}
+                            onChange={(e) => updateStageField(idx, "name", e.target.value)}
+                            className="h-9 rounded-xl border px-2 w-44"
+                            placeholder="Libellé"
                           />
-                          <input
-                            value={s.color || ""}
-                            onChange={(e)=>updateStageField(idx, "color", e.target.value)}
-                            className="h-9 rounded-xl border px-2 w-28 font-mono"
-                            placeholder="#RRGGBB"
-                          />
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Actions secondaires (ouvrir modals ciblés si besoin) */}
-                      <td className="px-3 py-2 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => setStageEditOpen({ open: true, stageKey: s.key })}
-                            className="px-3 py-1 rounded-xl border hover:bg-gray-50"
-                          >
-                            Éditer…
-                          </button>
-                          <button
-                            onClick={() => setStageDeleteOpen({ open: true, stageKey: s.key })}
-                            className="px-3 py-1 rounded-xl border text-rose-600 hover:bg-rose-50"
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        {/* Couleur (editable) */}
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={s.color || "#2563eb"}
+                              onChange={(e) => updateStageField(idx, "color", e.target.value)}
+                              className="h-9 w-16 rounded border"
+                            />
+                            <input
+                              value={s.color || ""}
+                              onChange={(e) => updateStageField(idx, "color", e.target.value)}
+                              className="h-9 rounded-xl border px-2 w-28 font-mono"
+                              placeholder="#RRGGBB"
+                            />
+                          </div>
+                        </td>
+
+                        {/* Rôles autorisés (checkbox) */}
+                        <td className="px-3 py-2">
+                          <RoleCheckboxList
+                            roles={roles || []}
+                            value={s.allowedRoles || []}
+                            onChange={(vals) => updateStageField(idx, "allowedRoles", vals)}
+                            namePrefix={`update-role-${idx}`}
+                          />
+                        </td>
+
+                        {/* Actions secondaires (ouvrir modals ciblés) */}
+                        <td className="px-3 py-2 text-right">
+                          <div className="flex justify-end gap-2">
+                            {s._id && (
+                              <>
+                                <button
+                                  onClick={() => setStageEditOpen({ open: true, stageId: String(s._id) })}
+                                  className="px-3 py-1 rounded-xl border hover:bg-gray-50"
+                                >
+                                  Éditer…
+                                </button>
+                                <button
+                                  onClick={() => setStageDeleteOpen({ open: true, stageId: String(s._id) })}
+                                  className="px-3 py-1 rounded-xl border text-rose-600 hover:bg-rose-50"
+                                >
+                                  Supprimer
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 {(!editing.stages || editing.stages.length === 0) && (
-                  <tr><td colSpan={5} className="px-3 py-6 text-center text-gray-500">Aucune étape</td></tr>
+                  <tr>
+                    <td colSpan={5} className="px-3 py-6 text-center text-gray-500">
+                      Aucune étape
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -283,32 +274,32 @@ const UpdateMeasurementType: React.FC<Props> = ({ open, onClose, value }) => {
 
         {/* Footer */}
         <div className="px-5 py-4 border-t flex items-center justify-end gap-2">
-          <button onClick={onClose} className="h-10 px-4 rounded-xl border text-sm hover:bg-gray-50">Fermer</button>
+          <button onClick={onClose} className="h-10 px-4 rounded-xl border text-sm hover:bg-gray-50">
+            Fermer
+          </button>
           <button
             onClick={onSave}
-            disabled={saving || hasDuplicateStageKeys}
+            disabled={saving}
             className="h-10 px-4 rounded-xl bg-indigo-600 text-white text-sm hover:bg-indigo-700 disabled:opacity-60"
-            title={hasDuplicateStageKeys ? "Corrigez les doublons avant d’enregistrer" : ""}
           >
             {saving ? "Enregistrement…" : "Enregistrer"}
           </button>
         </div>
       </div>
 
-      {/* Modaux Étapes (conservent les actions ciblées si nécessaire) */}
+      {/* Modaux Étapes */}
       {stageAddOpen && <AddStage typeId={value._id!} onClose={() => setStageAddOpen(false)} />}
-      {stageEditOpen.open && stageEditOpen.stageKey && (
-        <EditStage typeId={value._id!} stageKey={stageEditOpen.stageKey} onClose={() => setStageEditOpen({ open: false })} />
+      {stageEditOpen.open && stageEditOpen.stageId && (
+        <EditStage typeId={value._id!} stageId={stageEditOpen.stageId} onClose={() => setStageEditOpen({ open: false })} />
       )}
-      {stageDeleteOpen.open && stageDeleteOpen.stageKey && (
-        <DeleteStage typeId={value._id!} stageKey={stageDeleteOpen.stageKey} onClose={() => setStageDeleteOpen({ open: false })} />
+      {stageDeleteOpen.open && stageDeleteOpen.stageId && (
+        <DeleteStage typeId={value._id!} stageId={stageDeleteOpen.stageId} onClose={() => setStageDeleteOpen({ open: false })} />
       )}
 
       {/* Duplication avancée */}
       <DuplicateStagesModal
         open={dupModalOpen}
-        source={sourceType}
-        excludeKeys={excludeKeys}
+        source={sourceType as any}
         onClose={() => setDupModalOpen(false)}
         onConfirm={onConfirmDuplicate}
       />

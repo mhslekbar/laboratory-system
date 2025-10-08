@@ -57,7 +57,7 @@ export interface CaseDoc extends Document {
 const CaseStageSchema = new Schema<CaseStage>(
   {
     stage:      { type: Schema.Types.ObjectId, required: true }, // ref إلى subdoc — ستُحلّ عبر $lookup
-    status:     { type: String, enum: ["pending","in_progress","done"], default: "pending", required: true },
+    status:     { type: String, default: "pending", required: true },
     startedAt:  Date,
     completedAt:Date,
     assignedTo: { type: Schema.Types.ObjectId, ref: "user" },
@@ -92,7 +92,7 @@ const CaseSchema = new Schema<CaseDoc>(
     },
 
     delivery: {
-      status: { type: String, enum: ["pending","scheduled","delivered","returned"], default: "pending" },
+      status: { type: String, default: "pending" },
       date:   { type: Date },
       note:   { type: String, trim: true },
     },
@@ -107,7 +107,7 @@ const CaseSchema = new Schema<CaseDoc>(
     auditTrail: {
       type: [
         {
-          actorRole: { type: String, enum: ["LAB","DOCTOR","SYSTEM"], required: true },
+          actorRole: { type: String, required: true },
           action:    { type: String, required: true, trim: true },
           meta:      { type: Schema.Types.Mixed },
           at:        { type: Date, default: Date.now },

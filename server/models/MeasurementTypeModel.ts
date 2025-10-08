@@ -1,12 +1,12 @@
-// models/MeasurementTypeModel.ts
 import mongoose, { Schema, Document, Types } from "mongoose";
 
+/* ================== Interfaces ================== */
 export interface StageTemplate {
   _id: Types.ObjectId;
-  key: string;
   name: string;
   order: number;
   color?: string;
+  allowedRoles: Types.ObjectId[];
 }
 
 export interface MeasurementType extends Document {
@@ -17,12 +17,15 @@ export interface MeasurementType extends Document {
   updatedAt?: Date;
 }
 
+/* ================== Schemas ================== */
 const StageTemplateSchema = new Schema<StageTemplate>(
   {
-    key:   { type: String, required: true, trim: true },
     name:  { type: String, required: true, trim: true },
     order: { type: Number, required: true, min: 0 },
     color: { type: String, default: "#2563eb" },
+    allowedRoles: [
+      { type: Schema.Types.ObjectId, ref: "role", required: true },
+    ],
   },
   { _id: true, timestamps: false }
 );

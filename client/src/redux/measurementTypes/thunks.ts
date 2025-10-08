@@ -8,6 +8,7 @@ import {
   addStageApi,
   updateStageApi,
   removeStageApi,
+  StageTemplate,
 } from "./api";
 import { mtStart, mtSuccess, mtFailure } from "./slice";
 
@@ -29,7 +30,7 @@ export const fetchMeasurementTypes =
 
 // CREATE
 export const createMeasurementType =
-  (data: { key: string; name: string; stages?: any[] }) =>
+  (data: { key: string; name: string; stages?: Omit<StageTemplate, "_id">[] }) =>
   async (dispatch: Dispatch<any>) => {
     try {
       dispatch(mtStart());
@@ -43,7 +44,7 @@ export const createMeasurementType =
 
 // UPDATE
 export const updateMeasurementType =
-  (id: string, data: any) =>
+  (id: string, data: Partial<{ name: string; stages: StageTemplate[] }>) =>
   async (dispatch: Dispatch<any>) => {
     try {
       dispatch(mtStart());
@@ -71,7 +72,10 @@ export const deleteMeasurementType =
 
 // STAGES
 export const addStage =
-  (id: string, stage: any) =>
+  (
+    id: string,
+    stage: Omit<StageTemplate, "_id"> // name, color?, order?, allowedRoles?
+  ) =>
   async (dispatch: Dispatch<any>) => {
     try {
       dispatch(mtStart());
@@ -84,11 +88,15 @@ export const addStage =
   };
 
 export const updateStage =
-  (id: string, stageKey: string, data: any) =>
+  (
+    id: string,
+    stageId: string, // <- stageId au lieu de stageKey
+    data: Partial<Omit<StageTemplate, "_id">>
+  ) =>
   async (dispatch: Dispatch<any>) => {
     try {
       dispatch(mtStart());
-      await updateStageApi(id, stageKey, data);
+      await updateStageApi(id, stageId, data);
       return dispatch(fetchMeasurementTypes());
     } catch (e: any) {
       dispatch(mtFailure([e?.response?.data || e?.message]));
@@ -97,11 +105,11 @@ export const updateStage =
   };
 
 export const removeStage =
-  (id: string, stageKey: string) =>
+  (id: string, stageId: string, force = false) =>
   async (dispatch: Dispatch<any>) => {
     try {
       dispatch(mtStart());
-      await removeStageApi(id, stageKey);
+      await removeStageApi(id, stageId, force);
       return dispatch(fetchMeasurementTypes());
     } catch (e: any) {
       dispatch(mtFailure([e?.response?.data || e?.message]));

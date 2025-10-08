@@ -1,10 +1,11 @@
-// src/components/stats/utils.ts
-export type DeliveryStatus = "pending" | "ready" | "completed";
-export type PeriodMode = "monthly" | "yearly" | "range";
+// =======================
+// src/components/stats/utils.ts (version simplifiée)
+// =======================
+
+export type DeliveryStatus = "pending" | "ready" | "delivered" | "scheduled";
 
 export type CaseItem = {
   _id?: string;
-  id?: string;
   createdAt?: string | Date;
   delivery?: { status?: DeliveryStatus | string | null };
   caseApproval?: { approved?: boolean | null };
@@ -12,30 +13,13 @@ export type CaseItem = {
   patient?: string | { _id?: string };
 };
 
-export type UserLike = { _id?: string; doctor?: { isDoctor?: boolean } | null; fullName?: string; username?: string };
-export type PatientLike = { _id?: string; name?: string };
-
-export const toYMD = (d: Date) => {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
-
-export const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-export const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
-
-export const safeId = (v: any): string | null => {
-  if (!v) return null;
-  if (typeof v === "string") return v;
-  return v._id ?? null;
-};
-
-export const normalizeStatus = (s?: string | null): DeliveryStatus => {
-  if (s === "ready") return "ready";
-  if (SAME(s, "completed")) return "completed";
-  return "pending";
-};
-
-const SAME = (a?: string | null, b?: string) => (a ?? "").toLowerCase() === (b ?? "").toLowerCase();
+// ------------------------
+// Dates
+// ------------------------
+export const startOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+export const endOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
 export const isWithinRange = (date?: string | Date, from?: string, to?: string) => {
   if (!date) return false;
@@ -50,10 +34,146 @@ export const isWithinRange = (date?: string | Date, from?: string, to?: string) 
   return true;
 };
 
-export const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-export const yearKey = (d: Date) => `${d.getFullYear()}`;
+// ------------------------
+// Normalisation du statut
+// ------------------------
+const SAME = (a?: string | null, b?: string) =>
+  (a ?? "").toLowerCase() === (b ?? "").toLowerCase();
 
-export const monthsBetween = (from: Date, to: Date) => {
+/** Renvoie exactement l'un des statuts connus, sans “fusion” */
+export const normalizeStatusRaw = (s?: string | null): DeliveryStatus => {
+  if (SAME(s, "delivered") || SAME(s, "completed")) return "delivered"; // alias legacy
+  if (SAME(s, "scheduled")) return "scheduled";
+  if (SAME(s, "ready")) return "ready";
+  return "pending";
+};
+
+// ------------------------
+// Toolbar (vues de livraison)
+// ------------------------
+export type DeliveryView = "all" | "pending" | "scheduled" | "delivered" | "received";
+
+/**
+ * Règles d’affichage de la toolbar :
+ * - "scheduled" = tout ce qui est PRÊT (scheduled OU ready)
+ * - "received"  = delivered && approved
+ */
+export const matchesDeliveryView = (c: CaseItem, view: DeliveryView): boolean => {
+  if (view === "all") return true;
+
+  const raw = normalizeStatusRaw(c.delivery?.status as any);
+  const isReceived = raw === "delivered" && !!c.caseApproval?.approved;
+
+  if (view === "received") return isReceived;
+  if (view === "delivered") return raw === "delivered";
+  if (view === "scheduled") return raw === "scheduled" || raw === "ready";
+  // view === "pending"
+  return raw === "pending";
+};
+
+// ------------------------
+// Filtres optionnels
+// ------------------------
+export type KpiFilters = {
+  delivery?: DeliveryView;   // "all" | "pending" | "scheduled" | "delivered" | "received"
+  doctorId?: string | null;
+  patientId?: string | null;
+};
+
+const getId = (v: any): string | null => {
+  if (!v) return null;
+  return typeof v === "string" ? v : v._id ?? null;
+};
+
+export const matchesFilters = (
+  it: CaseItem,
+  from?: string,
+  to?: string,
+  f: KpiFilters = {}
+) => {
+  // 1) vue delivery
+  const view = f.delivery ?? "all";
+  if (!matchesDeliveryView(it, view)) return false;
+
+  // 2) date
+  if (!isWithinRange(it.createdAt!, from, to)) return false;
+
+  // 3) doctor
+  if (f.doctorId) {
+    if (getId(it.doctor) !== f.doctorId) return false;
+  }
+
+  // 4) patient
+  if (f.patientId) {
+    if (getId(it.patient) !== f.patientId) return false;
+  }
+
+  return true;
+};
+
+// ------------------------
+// KPIs (compteurs simples)
+// ------------------------
+/**
+ * Compte les dossiers selon TES règles :
+ * - pending      : status === "pending"
+ * - ready        : status === "scheduled" OU "ready" (prêt à livrer)
+ * - delivered    : status === "delivered"
+ * - received     : delivered && approved === true  (SOUS-ENSEMBLE de delivered)
+ *
+ * Note: si tu veux des catégories exclusives, utilise `deliveredOnly = delivered - received`.
+ */
+export const kpisForRange = (
+  cases: CaseItem[],
+  from: string,
+  to: string,
+  filters?: KpiFilters
+) => {
+  let total = 0, pending = 0, ready = 0, delivered = 0, received = 0;
+
+  for (const c of cases) {
+    // Applique filtres (si fournis) sinon juste la plage de dates
+    if (filters) {
+      if (!matchesFilters(c, from, to, filters)) continue;
+    } else {
+      if (!isWithinRange(c.createdAt!, from, to)) continue;
+    }
+
+    total++;
+
+    const raw = normalizeStatusRaw(c.delivery?.status as any);
+    const isReceived = raw === "delivered" && !!c.caseApproval?.approved;
+
+    if (raw === "pending") pending++;
+    if (raw === "scheduled" || raw === "ready") ready++;
+    if (raw === "delivered") delivered++;
+    if (isReceived) received++;
+  }
+
+  const deliveredOnly = Math.max(0, delivered - received); // livré mais pas encore reçu (exclusif)
+
+  return {
+    total,
+    pending,
+    ready,               // “prêt” (scheduled/ready)
+    delivered,           // incluant ceux qui sont “reçus”
+    received,            // sous-ensemble de delivered
+    deliveredOnly        // utile si tu veux des barres/pastilles exclusives
+  };
+};
+
+
+// =======================
+// Ajouts "périodes" simples
+// =======================
+
+export type PeriodMode = "monthly" | "yearly" | "range";
+
+const monthKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+const yearKey = (d: Date) => `${d.getFullYear()}`;
+
+const monthsBetween = (from: Date, to: Date) => {
   const res: string[] = [];
   const cur = new Date(from.getFullYear(), from.getMonth(), 1);
   const end = new Date(to.getFullYear(), to.getMonth(), 1);
@@ -64,99 +184,164 @@ export const monthsBetween = (from: Date, to: Date) => {
   return res;
 };
 
-export const yearsBetween = (from: Date, to: Date) => {
+const yearsBetween = (from: Date, to: Date) => {
   const res: string[] = [];
   for (let y = from.getFullYear(); y <= to.getFullYear(); y++) res.push(String(y));
   return res;
 };
 
-export const aggregateCasesByMonth = (cases: CaseItem[], from: string, to: string) => {
+/**
+ * Agrégation mensuelle
+ * Règles:
+ *  - pending      : status === "pending"
+ *  - ready        : status === "scheduled" || "ready"
+ *  - delivered    : status === "delivered"
+ *  - received     : delivered && approved === true (sous-ensemble)
+ */
+export const aggregateCasesByMonth = (
+  cases: CaseItem[],
+  from: string,
+  to: string,
+  filters?: Omit<KpiFilters, "delivery">
+) => {
   const fromD = startOfDay(new Date(from));
   const toD = endOfDay(new Date(to));
+
   const buckets = monthsBetween(fromD, toD).reduce((acc, k) => {
-    acc[k] = { pending: 0, ready: 0, completed: 0, received: 0 };
+    acc[k] = { pending: 0, ready: 0, delivered: 0, received: 0 };
     return acc;
-  }, {} as Record<string, { pending: number; ready: number; completed: number; received: number }>);
+  }, {} as Record<string, { pending: number; ready: number; delivered: number; received: number }>);
 
   for (const c of cases) {
-    if (!isWithinRange(c.createdAt!, from, to)) continue;
+    // même logique de filtre que pour les KPI (sans vue delivery imposée)
+    if (!matchesFilters(c, from, to, { ...filters, delivery: "all" })) continue;
+
     const d = new Date(c.createdAt!);
-    const k = monthKey(d);
-    if (!buckets[k]) continue;
-    const st = normalizeStatus(c.delivery?.status as any);
-    buckets[k][st] += 1;
-    if (c.caseApproval?.approved) buckets[k].received += 1;
+    const key = monthKey(d);
+    if (!buckets[key]) continue;
+
+    const raw = normalizeStatusRaw(c.delivery?.status as any);
+    const isReceived = raw === "delivered" && !!c.caseApproval?.approved;
+
+    if (raw === "pending") buckets[key].pending += 1;
+    if (raw === "scheduled" || raw === "ready") buckets[key].ready += 1;
+    if (raw === "delivered") buckets[key].delivered += 1;
+    if (isReceived) buckets[key].received += 1;
   }
 
-  return Object.entries(buckets).map(([k, v]) => ({
-    period: k,
+  return Object.entries(buckets).map(([period, v]) => ({
+    period,
     ...v,
-    totalStatus: v.pending + v.ready + v.completed,
-    totalInclReceived: v.pending + v.ready + v.completed + v.received,
+    totalStatus: v.pending + v.ready + v.delivered,
+    totalInclReceived: v.pending + v.ready + v.delivered + v.received,
+    deliveredOnly: Math.max(0, v.delivered - v.received),
   }));
 };
 
-export const aggregateCasesByYear = (cases: CaseItem[], from: string, to: string) => {
+/** Agrégation annuelle — même logique que ci-dessus */
+export const aggregateCasesByYear = (
+  cases: CaseItem[],
+  from: string,
+  to: string,
+  filters?: Omit<KpiFilters, "delivery">
+) => {
   const fromD = startOfDay(new Date(from));
   const toD = endOfDay(new Date(to));
+
   const buckets = yearsBetween(fromD, toD).reduce((acc, k) => {
-    acc[k] = { pending: 0, ready: 0, completed: 0, received: 0 };
+    acc[k] = { pending: 0, ready: 0, delivered: 0, received: 0 };
     return acc;
-  }, {} as Record<string, { pending: number; ready: number; completed: number; received: number }>);
+  }, {} as Record<string, { pending: number; ready: number; delivered: number; received: number }>);
 
   for (const c of cases) {
-    if (!isWithinRange(c.createdAt!, from, to)) continue;
+    if (!matchesFilters(c, from, to, { ...filters, delivery: "all" })) continue;
+
     const d = new Date(c.createdAt!);
-    const k = yearKey(d);
-    if (!buckets[k]) continue;
-    const st = normalizeStatus(c.delivery?.status as any);
-    buckets[k][st] += 1;
-    if (c.caseApproval?.approved) buckets[k].received += 1;
+    const key = yearKey(d);
+    if (!buckets[key]) continue;
+
+    const raw = normalizeStatusRaw(c.delivery?.status as any);
+    const isReceived = raw === "delivered" && !!c.caseApproval?.approved;
+
+    if (raw === "pending") buckets[key].pending += 1;
+    if (raw === "scheduled" || raw === "ready") buckets[key].ready += 1;
+    if (raw === "delivered") buckets[key].delivered += 1;
+    if (isReceived) buckets[key].received += 1;
   }
 
-  return Object.entries(buckets).map(([k, v]) => ({
-    period: k,
+  return Object.entries(buckets).map(([period, v]) => ({
+    period,
     ...v,
-    totalStatus: v.pending + v.ready + v.completed,
-    totalInclReceived: v.pending + v.ready + v.completed + v.received,
+    totalStatus: v.pending + v.ready + v.delivered,
+    totalInclReceived: v.pending + v.ready + v.delivered + v.received,
+    deliveredOnly: Math.max(0, v.delivered - v.received),
   }));
 };
 
-export const kpisForRange = (cases: CaseItem[], from: string, to: string) => {
-  let total = 0, pending = 0, ready = 0, completed = 0, received = 0;
-  for (const c of cases) {
-    if (!isWithinRange(c.createdAt!, from, to)) continue;
-    total++;
-    const st = normalizeStatus(c.delivery?.status as any);
-    if (st === "pending") pending++;
-    else if (st === "ready") ready++;
-    else completed++;
-    if (c.caseApproval?.approved) received++;
-  }
-  return { total, pending, ready, completed, received };
+
+/** Convertit une date en format "YYYY-MM-DD" */
+export const toYMD = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-export const topDoctors = (cases: CaseItem[], users: UserLike[], n = 10, from?: string, to?: string) => {
-  const docs = new Map<string, { name: string; pending: number; received: number; total: number }>();
-  const isIn = (c: CaseItem) => (from || to) ? isWithinRange(c.createdAt!, from, to) : true;
 
+// =======================
+// Top Doctors / Patients
+// =======================
+
+export type UserLike = {
+  _id?: string;
+  doctor?: { isDoctor?: boolean } | null;
+  fullName?: string;
+  username?: string;
+};
+
+export type PatientLike = {
+  _id?: string;
+  name?: string;
+};
+
+const safeId = (v: any): string | null => {
+  if (!v) return null;
+  if (typeof v === "string") return v;
+  return v._id ?? null;
+};
+
+/**
+ * Classement des docteurs selon :
+ *  - nombre total de dossiers
+ *  - nombre de dossiers reçus (livrés + approuvés)
+ *  - nombre en attente
+ */
+export const topDoctors = (
+  cases: CaseItem[],
+  users: UserLike[],
+  n = 10,
+  from?: string,
+  to?: string
+) => {
+  const docs = new Map<string, { name: string; pending: number; received: number; total: number }>();
+  const isInRange = (c: CaseItem) => (from || to) ? isWithinRange(c.createdAt!, from, to) : true;
   const nameOf = (u?: UserLike | null) => (u?.fullName || u?.username || "—");
 
   for (const c of cases) {
-    if (!isIn(c)) continue;
+    if (!isInRange(c)) continue;
+
     const did = safeId(c.doctor);
     if (!did) continue;
+
     const u = users.find(x => safeId(x) === did);
     if (!u || !(u.doctor?.isDoctor)) continue;
 
-    const key = did;
-    if (!docs.has(key)) docs.set(key, { name: nameOf(u), pending: 0, received: 0, total: 0 });
+    if (!docs.has(did)) docs.set(did, { name: nameOf(u), pending: 0, received: 0, total: 0 });
+    const bucket = docs.get(did)!;
 
-    const bucket = docs.get(key)!;
     bucket.total++;
-    const st = normalizeStatus(c.delivery?.status as any);
-    if (st === "pending") bucket.pending++;
-    if (c.caseApproval?.approved) bucket.received++;
+    const status = normalizeStatusRaw(c.delivery?.status as any);
+    const isReceived = status === "delivered" && !!c.caseApproval?.approved;
+    if (status === "pending") bucket.pending++;
+    if (isReceived) bucket.received++;
   }
 
   return Array.from(docs.values())
@@ -164,27 +349,40 @@ export const topDoctors = (cases: CaseItem[], users: UserLike[], n = 10, from?: 
     .slice(0, n);
 };
 
-export const topPatients = (cases: CaseItem[], patients: PatientLike[], n = 10, from?: string, to?: string) => {
+/**
+ * Classement des patients selon :
+ *  - nombre total de dossiers
+ *  - nombre reçus
+ *  - nombre en attente
+ */
+export const topPatients = (
+  cases: CaseItem[],
+  patients: PatientLike[],
+  n = 10,
+  from?: string,
+  to?: string
+) => {
   const pats = new Map<string, { name: string; pending: number; received: number; total: number }>();
-  const isIn = (c: CaseItem) => (from || to) ? isWithinRange(c.createdAt!, from, to) : true;
-
+  const isInRange = (c: CaseItem) => (from || to) ? isWithinRange(c.createdAt!, from, to) : true;
   const nameOf = (p?: PatientLike | null) => (p?.name || "—");
 
   for (const c of cases) {
-    if (!isIn(c)) continue;
+    if (!isInRange(c)) continue;
+
     const pid = safeId(c.patient);
     if (!pid) continue;
+
     const p = patients.find(x => safeId(x) === pid);
     if (!p) continue;
 
-    const key = pid;
-    if (!pats.has(key)) pats.set(key, { name: nameOf(p), pending: 0, received: 0, total: 0 });
+    if (!pats.has(pid)) pats.set(pid, { name: nameOf(p), pending: 0, received: 0, total: 0 });
+    const bucket = pats.get(pid)!;
 
-    const bucket = pats.get(key)!;
     bucket.total++;
-    const st = normalizeStatus(c.delivery?.status as any);
-    if (st === "pending") bucket.pending++;
-    if (c.caseApproval?.approved) bucket.received++;
+    const status = normalizeStatusRaw(c.delivery?.status as any);
+    const isReceived = status === "delivered" && !!c.caseApproval?.approved;
+    if (status === "pending") bucket.pending++;
+    if (isReceived) bucket.received++;
   }
 
   return Array.from(pats.values())

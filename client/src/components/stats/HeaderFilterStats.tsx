@@ -59,7 +59,7 @@ const HeaderFilterStats: React.FC<Props> = ({
       type="button"
       aria-pressed={mode === value}
       onClick={() => setMode(value)}
-      className={`px-3 py-1.5 text-sm rounded-lg transition ${
+      className={`px-3 py-1.5 text-sm rounded-lg transition whitespace-nowrap ${
         mode === value ? "bg-indigo-600 text-white shadow" : "text-gray-700 hover:bg-gray-100"
       }`}
     >
@@ -67,8 +67,12 @@ const HeaderFilterStats: React.FC<Props> = ({
     </button>
   );
 
-  const KpiCard: React.FC<{ icon: React.ReactNode; label: string; value: number | string; accent?: keyof typeof ACCENTS; }> =
-  ({ icon, label, value, accent = "indigo" }) => {
+  const KpiCard: React.FC<{
+    icon: React.ReactNode;
+    label: string;
+    value: number | string;
+    accent?: keyof typeof ACCENTS;
+  }> = ({ icon, label, value, accent = "indigo" }) => {
     const c = ACCENTS[accent] || ACCENTS.indigo;
     return (
       <div className="rounded-2xl border bg-white p-4 flex items-center gap-3">
@@ -93,41 +97,69 @@ const HeaderFilterStats: React.FC<Props> = ({
         </span>
       }
       right={
-        <div className="flex flex-col gap-2 items-stretch">
-          <div className="inline-flex rounded-xl border border-gray-300 bg-white p-1 shadow-sm self-end">
+        // -------- RIGHT PANE (RESPONSIVE) --------
+        <div className="flex flex-col gap-3 w-full sm:w-auto">
+          {/* Modes (wrap en mobile) */}
+          <div className="inline-flex flex-wrap gap-1 rounded-xl border border-gray-300 bg-white p-1 shadow-sm">
             <ModePill value="monthly" label="Mensuel" />
             <ModePill value="yearly"  label="Annuel" />
             <ModePill value="range"   label="Plage" />
           </div>
 
-          <div className="flex flex-wrap items-end gap-2 justify-end">
-            <div className="flex items-center gap-2">
-              <label className="text-sm">De</label>
-              <div className="relative">
-                <FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="date" value={dateFrom || ""} onChange={(e) => setDateFrom(e.target.value)} className="h-10 rounded-xl border pl-9 pr-3" />
+          {/* Dates + Presets (full width en mobile) */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-end sm:justify-end">
+            {/* Inputs dates */}
+            <div className="grid grid-cols-1 sm:flex sm:items-center gap-2 sm:gap-3 w-full">
+              <div className="w-full sm:w-auto">
+                <label className="text-sm block mb-1">De</label>
+                <div className="relative">
+                  <FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="date"
+                    value={dateFrom || ""}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="h-10 w-full sm:w-48 rounded-xl border pl-9 pr-3"
+                  />
+                </div>
               </div>
-              <label className="text-sm">à</label>
-              <div className="relative">
-                <FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="date" value={dateTo || ""} onChange={(e) => setDateTo(e.target.value)} className="h-10 rounded-xl border pl-9 pr-3" />
+              <div className="w-full sm:w-auto">
+                <label className="text-sm block mb-1">À</label>
+                <div className="relative">
+                  <FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="date"
+                    value={dateTo || ""}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="h-10 w-full sm:w-48 rounded-xl border pl-9 pr-3"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="inline-flex rounded-xl border border-gray-300 bg-white p-1 shadow-sm">
-              <button type="button" onClick={() => applyPreset("today")} className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100" title="Aujourd'hui">Aujourd’hui</button>
-              <button type="button" onClick={() => applyPreset("7d")}    className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100" title="7 derniers jours">7 j</button>
-              <button type="button" onClick={() => applyPreset("30d")}   className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100" title="30 derniers jours">30 j</button>
-              <button type="button" onClick={() => applyPreset("ytd")}   className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100" title="Depuis le 1er janvier">YTD</button>
+            {/* Presets (wrap) */}
+            <div className="inline-flex flex-wrap gap-1 rounded-xl border border-gray-300 bg-white p-1 shadow-sm">
+              <button type="button" onClick={() => applyPreset("today")} className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100">
+                Aujourd’hui
+              </button>
+              <button type="button" onClick={() => applyPreset("7d")} className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100">
+                7 j
+              </button>
+              <button type="button" onClick={() => applyPreset("30d")} className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100">
+                30 j
+              </button>
+              <button type="button" onClick={() => applyPreset("ytd")} className="px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100">
+                YTD
+              </button>
             </div>
           </div>
         </div>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard icon={<FiLayers />} label="Dossiers" value={totalCases}  accent="indigo" />
-        <KpiCard icon={<FiUsers  />} label="Médecins" value={doctorsCount} accent="emerald" />
-        <KpiCard icon={<FiUser   />} label="Patients" value={patientsCount} accent="violet" />
+      {/* KPIs (responsive grid) */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3">
+        <KpiCard icon={<FiLayers />} label="Dossiers"  value={totalCases}    accent="indigo" />
+        <KpiCard icon={<FiUsers  />} label="Médecins"  value={doctorsCount}  accent="emerald" />
+        <KpiCard icon={<FiUser   />} label="Patients"  value={patientsCount} accent="violet" />
       </div>
     </ChartCard>
   );

@@ -1,26 +1,36 @@
 // components/measurementTypes/cible/EditStage.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { State } from "../../../redux/store";
+import { useDispatch } from "react-redux";
+import { State } from "../../../redux/store"; // <-- ajuste l’import si besoin
 import { fetchMeasurementTypes, updateStage } from "../../../redux/measurementTypes/thunks";
+import RoleCheckboxList, { Role } from "../parts/RoleCheckboxList";
+import { useSelector } from "react-redux";
 
 type Props = {
   typeId: string;
-  stageKey: string;
+  stageId: string;    // on cible par _id
   onClose: () => void;
 };
 
 const HEX_RX = /^#?[0-9a-fA-F]{6}$/;
 
-const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
+const EditStage: React.FC<Props> = ({ typeId, stageId, onClose }) => {
   const dispatch: any = useDispatch();
+
+  // Rôles via useSelect
+  const { roles } = useSelector((s: State) => s.roles) as unknown as { roles: Role[] };
+  // Type + stage courants via useSelect (on lit la liste existante du store)
   const { items } = useSelector((s: State) => (s as any).measurementTypes);
-  const type = items?.find((t: any) => t._id === typeId);
-  const stage = (type?.stages || []).find((s: any) => s.key === stageKey);
+  const type = items?.find((t: any) => String(t._id) === String(typeId));
+  const stage = (type?.stages || []).find((s: any) => String(s._id) === String(stageId));
 
   const [name, setName] = useState(stage?.name || "");
   const [color, setColor] = useState(stage?.color || "#2563eb");
   const [order, setOrder] = useState<number>(stage?.order || 1);
+  const [allowedRoles, setAllowedRoles] = useState<string[]>(
+    Array.isArray(stage?.allowedRoles) ? stage!.allowedRoles : []
+  );
+
   const [loading, setLoading] = useState(false);
   const [hexValid, setHexValid] = useState(true);
 
@@ -31,7 +41,8 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
     setName(stage?.name || "");
     setColor(stage?.color || "#2563eb");
     setOrder(stage?.order || 1);
-    setHexValid(!stage?.color || HEX_RX.test(stage.color));
+    setAllowedRoles(Array.isArray(stage?.allowedRoles) ? stage!.allowedRoles : []);
+    setHexValid(!stage?.color || HEX_RX.test(stage?.color || ""));
   }, [stage]);
 
   useEffect(() => {
@@ -44,7 +55,7 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
     if (!val) return "";
     const v = val.startsWith("#") ? val : `#${val}`;
     return v.toUpperCase();
-  };
+    };
 
   const onHexInput = (val: string) => {
     setColor(val);
@@ -66,10 +77,11 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
     try {
       setLoading(true);
       const ok = await dispatch(
-        updateStage(typeId, stageKey, {
+        updateStage(typeId, stageId, {
           name: name.trim(),
           color: color ? normalizeHex(color) : undefined,
           order: order || 1,
+          allowedRoles: Array.from(new Set(allowedRoles)),
         })
       );
       if (ok) {
@@ -90,8 +102,8 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
         <div className="px-5 py-4 bg-gradient-to-r from-indigo-600 to-purple-500 text-white">
-          <h2 className="text-lg font-semibold">Éditer l’étape « {stageKey} »</h2>
-          <p className="text-xs opacity-90">Modifiez le nom, la couleur et l’ordre d’affichage.</p>
+          <h2 className="text-lg font-semibold">Éditer l’étape</h2>
+          <p className="text-xs opacity-90">Modifiez le nom, la couleur, l’ordre et les rôles autorisés.</p>
         </div>
 
         {/* Body */}
@@ -99,7 +111,9 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
           {/* Ligne 1 : Nom / Ordre */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-xs font-medium mb-1">Nom <span className="text-rose-600">*</span></label>
+              <label className="text-xs font-medium mb-1">
+                Nom <span className="text-rose-600">*</span>
+              </label>
               <input
                 ref={nameRef}
                 value={name}
@@ -119,18 +133,18 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
                 className="h-11 rounded-xl border px-3 outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="1, 2, 3…"
               />
-              <p className="mt-1 text-[11px] text-gray-500">Détermine la position de l’étape (1 = en premier).</p>
+              <p className="mt-1 text-[11px] text-gray-500">Détermine la position (1 = en premier).</p>
             </div>
           </div>
 
-          {/* Ligne 2 : Couleur */}
+          {/* Ligne 2 : Couleur + Rôles (checkbox) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col sm:col-span-2">
+            <div className="flex flex-col">
               <label className="text-xs font-medium mb-1">Couleur</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
-                  value={HEX_RX.test(color) ? color : "#2563EB"}
+                  value={HEX_RX.test(color) ? (color.startsWith("#") ? color : `#${color}`) : "#2563EB"}
                   onChange={(e) => onHexInput(e.target.value)}
                   className="h-11 w-16 rounded border"
                   aria-label="Sélecteur de couleur"
@@ -144,21 +158,29 @@ const EditStage: React.FC<Props> = ({ typeId, stageKey, onClose }) => {
                   }`}
                   placeholder="#RRGGBB"
                 />
-                <span className="inline-flex items-center gap-2 text-xs text-gray-600">
-                  Aperçu
-                  <span className="inline-block h-5 w-5 rounded-full border" style={{ background: HEX_RX.test(color) ? color : "#cbd5e1" }} />
-                </span>
+                <span className="inline-block h-5 w-5 rounded-full border" style={{ background: HEX_RX.test(color) ? (color.startsWith("#") ? color : `#${color}`) : "#cbd5e1" }} />
               </div>
-              {!hexValid && (
-                <p className="mt-1 text-[11px] text-rose-600">Format invalide. Exemple: <code>#1E90FF</code></p>
-              )}
+              {!hexValid && <p className="mt-1 text-[11px] text-rose-600">Format invalide. Exemple: <code>#1E90FF</code></p>}
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-xs font-medium mb-1">Rôles autorisés</label>
+              <RoleCheckboxList
+                roles={roles || []}
+                value={allowedRoles}
+                onChange={setAllowedRoles}
+                namePrefix="editstage-role"
+              />
+              <p className="mt-1 text-[11px] text-gray-500">Vide = aucune restriction de rôle.</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
         <div className="px-5 py-4 border-t flex items-center justify-end gap-2">
-          <button onClick={onClose} className="h-10 px-4 rounded-xl border text-sm hover:bg-gray-50">Annuler</button>
+          <button onClick={onClose} className="h-10 px-4 rounded-xl border text-sm hover:bg-gray-50">
+            Annuler
+          </button>
           <button
             onClick={onSave}
             disabled={loading || !name.trim() || !hexValid}

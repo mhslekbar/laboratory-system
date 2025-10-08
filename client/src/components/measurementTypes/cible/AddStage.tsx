@@ -2,6 +2,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { addStage, fetchMeasurementTypes } from "../../../redux/measurementTypes/thunks";
+import RoleCheckboxList, { Role } from "../parts/RoleCheckboxList";
+import { State } from "../../../redux/store"; // <-- ajuste l'import si besoin
+import { useSelector } from "react-redux";
 
 type Props = {
   typeId: string;
@@ -10,23 +13,34 @@ type Props = {
 
 const AddStage: React.FC<Props> = ({ typeId, onClose }) => {
   const dispatch: any = useDispatch();
-  const [key, setKey] = useState("");
+
+  // Récupération des rôles depuis le store via useSelect
+  const { roles } = useSelector((s: State) => s.roles) as unknown as { roles: Role[] };
+
   const [name, setName] = useState("");
   const [color, setColor] = useState("#2563eb");
   const [order, setOrder] = useState<number | undefined>(undefined);
+  const [allowedRoles, setAllowedRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const keyRef = useRef<HTMLInputElement>(null);
+
+  const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // focus sur le premier champ à l’ouverture
-    keyRef.current?.focus();
+    nameRef.current?.focus();
   }, []);
 
   const onSave = async () => {
-    if (!key.trim() || !name.trim()) return alert("‘clé’ et ‘nom’ sont obligatoires.");
+    if (!name.trim()) return alert("‘nom’ est obligatoire.");
     try {
       setLoading(true);
-      const ok = await dispatch(addStage(typeId, { key: key.trim(), name: name.trim(), color, order }));
+      const ok = await dispatch(
+        addStage(typeId, {
+          name: name.trim(),
+          color,
+          order,
+          allowedRoles: Array.from(new Set(allowedRoles)),
+        })
+      );
       if (ok) {
         await dispatch(fetchMeasurementTypes());
         onClose();
@@ -42,37 +56,41 @@ const AddStage: React.FC<Props> = ({ typeId, onClose }) => {
         {/* Header */}
         <div className="px-5 py-4 bg-gradient-to-r from-emerald-600 to-teal-500 text-white">
           <h2 className="text-lg font-semibold">Ajouter une étape</h2>
-          <p className="text-xs opacity-90">Renseignez la clé, le nom, la couleur et l’ordre (optionnel).</p>
+          <p className="text-xs opacity-90">Nom, couleur, ordre (optionnel) et rôles autorisés.</p>
         </div>
 
         {/* Body */}
         <div className="p-5 space-y-5">
-          {/* Ligne 1 : Clé / Nom */}
+          {/* Ligne 1 : Nom / Ordre */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-xs font-medium mb-1">Clé <span className="text-rose-600">*</span></label>
+              <label className="text-xs font-medium mb-1">
+                Nom <span className="text-rose-600">*</span>
+              </label>
               <input
-                ref={keyRef}
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-                className="h-11 rounded-xl border px-3 outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="ex: design / drill…"
-              />
-              <p className="mt-1 text-[11px] text-gray-500">Identifiant unique (sans espaces).</p>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-xs font-medium mb-1">Nom <span className="text-rose-600">*</span></label>
-              <input
+                ref={nameRef}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="h-11 rounded-xl border px-3 outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Libellé de l’étape"
               />
             </div>
+
+            <div className="flex flex-col">
+              <label className="text-xs font-medium mb-1">Ordre (optionnel)</label>
+              <input
+                type="number"
+                min={1}
+                value={order ?? ""}
+                onChange={(e) => setOrder(e.target.value ? Number(e.target.value) : undefined)}
+                className="h-11 rounded-xl border px-3 outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="1, 2, 3…"
+              />
+              <p className="mt-1 text-[11px] text-gray-500">Laissez vide pour ajouter à la suite automatiquement.</p>
+            </div>
           </div>
 
-          {/* Ligne 2 : Couleur / Ordre */}
+          {/* Ligne 2 : Couleur */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col">
               <label className="text-xs font-medium mb-1">Couleur</label>
@@ -91,27 +109,28 @@ const AddStage: React.FC<Props> = ({ typeId, onClose }) => {
                   placeholder="#RRGGBB"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-gray-500">Choisissez une couleur ou collez un hex (ex: #1E90FF).</p>
+              <p className="mt-1 text-[11px] text-gray-500">Exemple : <code>#1E90FF</code></p>
             </div>
 
+            {/* Rôles autorisés (checkbox) */}
             <div className="flex flex-col">
-              <label className="text-xs font-medium mb-1">Ordre (optionnel)</label>
-              <input
-                type="number"
-                min={1}
-                value={order ?? ""}
-                onChange={(e) => setOrder(e.target.value ? Number(e.target.value) : undefined)}
-                className="h-11 rounded-xl border px-3 outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="1, 2, 3…"
+              <label className="text-xs font-medium mb-1">Rôles autorisés</label>
+              <RoleCheckboxList
+                roles={roles || []}
+                value={allowedRoles}
+                onChange={setAllowedRoles}
+                namePrefix="addstage-role"
               />
-              <p className="mt-1 text-[11px] text-gray-500">Laissez vide pour ajouter à la suite automatiquement.</p>
+              <p className="mt-1 text-[11px] text-gray-500">Vide = aucune restriction de rôle.</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
         <div className="px-5 py-4 border-t flex items-center justify-end gap-2">
-          <button onClick={onClose} className="h-10 px-4 rounded-xl border text-sm hover:bg-gray-50">Annuler</button>
+          <button onClick={onClose} className="h-10 px-4 rounded-xl border text-sm hover:bg-gray-50">
+            Annuler
+          </button>
           <button
             onClick={onSave}
             disabled={loading}

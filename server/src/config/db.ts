@@ -43,8 +43,6 @@ export const connectDB = async (): Promise<MConn> => {
   try {
     const logUri = sanitizeUri(uri);
     if (!cache.promise) {
-      console.log("env: ", env.NODE_ENV);
-      console.log(`⏳ Connecting MongoDB → ${logUri}`);
       cache.promise = mongoose.connect(uri, opts).then((m) => m);
     }
     cache.conn = await cache.promise;

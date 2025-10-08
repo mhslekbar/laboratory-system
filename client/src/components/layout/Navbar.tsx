@@ -88,7 +88,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard",        to: "/dashboard",   icon: <HiOutlineHome /> }, // عام
   { label: "Cases",            to: "/cases",       icon: <HiOutlineClipboardList />, collectionName: "DOSSIERS" },
   { label: "Patients",         to: "/patients",    icon: <HiOutlineUserGroup />,      collectionName: "PATIENTS" },
-  { label: "Doctors / Users",  to: "/users",       icon: <HiOutlineUserCircle />,     collectionName: "UTILISATEURS" },
+  { label: "Médecins / Utilisateurs",  to: "/users",       icon: <HiOutlineUserCircle />,     collectionName: "UTILISATEURS" },
   { label: "Types",            to: "/types",       icon: <HiOutlineCollection />,     collectionName: "TYPES" },
   { label: "Statistics",       to: "/stats",       icon: <HiOutlineChartPie />,       collectionName: "STATISTIQUES" },
   { label: "Roles",            to: "/roles",       icon: <HiOutlineShieldCheck />,    collectionName: "ROLES" },

@@ -1,8 +1,23 @@
 import React, { useMemo } from "react";
 import { CaseItem, UserLike, topDoctors } from "./utils";
 import ChartCard from "./ChartCard";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
-import { FiUsers, FiAward, FiCalendar, FiUserCheck, FiClock } from "react-icons/fi";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid
+} from "recharts";
+import {
+  FiUsers,
+  FiAward,
+  FiCalendar,
+  FiUserCheck,
+  FiClock
+} from "react-icons/fi";
 import { STATUS_COLORS, Gradients, getFill } from "./theme";
 
 const nf = new Intl.NumberFormat("fr-FR");
@@ -98,17 +113,57 @@ const DoctorsStats: React.FC<Props> = ({ cases, users, dateFrom, dateTo, debug =
 
   const data = top;
   const hasAny = data.length > 0;
-  const periodLabel = (dateFrom || "—") + " → " + (dateTo || "—");
+
+  // -- helpers pour l'entête --
+  const fmtDate = (s?: string) => {
+    if (!s) return "—";
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s : d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+  };
+  const periodLabel = `${fmtDate(dateFrom)} → ${fmtDate(dateTo)}`;
 
   return (
     <div className="space-y-4">
+      {/* Header — Statistiques Médecins */}
+      <header className="relative overflow-hidden rounded-2xl border bg-white/80 dark:bg-slate-900/40 backdrop-blur p-5 shadow-sm">
+        {/* Décor subtil */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-500/10 dark:to-emerald-300/10 blur-2xl" />
+        <div className="pointer-events-none absolute -left-12 -bottom-12 h-44 w-44 rounded-full bg-gradient-to-tr from-indigo-100 to-indigo-200 dark:from-indigo-500/10 dark:to-indigo-300/10 blur-2xl" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          {/* Titre + sous-titre */}
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-xl grid place-items-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
+              <FiUsers className="text-xl" />
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-gray-500">Statistiques</div>
+              <h2 className="text-xl sm:text-2xl font-semibold leading-tight">Médecins</h2>
+              <p className="mt-1 text-xs text-gray-500">Période&nbsp;: {periodLabel}</p>
+            </div>
+          </div>
+
+          {/* Badges rapides */}
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200">
+              Total médecins&nbsp;: {nf.format(doctorsCount)}
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
+              Top affiché&nbsp;: {nf.format(Math.min(10, data.length))}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <KPI icon={<FiUsers />}     label="Médecins"          value={doctorsCount} />
-        <KPI icon={<FiAward />}     label="Top (affichés)"    value={data.length} />
-        <KPI icon={<FiUserCheck />} label="Reçus (Top 10)"    value={data.reduce((s, r) => s + (r.received || 0), 0)} accent={STATUS_COLORS.received.main} />
-        <KPI icon={<FiClock />}     label="En attente (Top 10)" value={data.reduce((s, r) => s + (r.pending  || 0), 0)} accent={STATUS_COLORS.pending.main} />
+        <KPI icon={<FiUsers />}     label="Médecins"             value={doctorsCount} />
+        <KPI icon={<FiAward />}     label="Top (affichés)"       value={data.length} />
+        <KPI icon={<FiUserCheck />} label="Reçus (Top 10)"       value={data.reduce((s, r) => s + (r.received || 0), 0)} accent={STATUS_COLORS.received.main} />
+        <KPI icon={<FiClock />}     label="En attente (Top 10)"  value={data.reduce((s, r) => s + (r.pending  || 0), 0)} accent={STATUS_COLORS.pending.main} />
       </div>
 
+      {/* Chart vertical bars */}
       <ChartCard title="Top 10 — cas reçus & en attente" subtitle="Classement des médecins sur la période sélectionnée">
         {!hasAny ? (
           <EmptyBlock />
@@ -130,6 +185,7 @@ const DoctorsStats: React.FC<Props> = ({ cases, users, dateFrom, dateTo, debug =
         )}
       </ChartCard>
 
+      {/* Tableau Top 10 */}
       <ChartCard title="Tableau (Top 10)" subtitle={periodLabel}>
         {!hasAny ? (
           <EmptyBlock label="Aucun médecin sur la période" />

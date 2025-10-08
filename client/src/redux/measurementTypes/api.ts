@@ -3,10 +3,11 @@ import { get, privateRequest, TypeMethod } from "../../requestMethods";
 
 /* ============== Types ============== */
 export type StageTemplate = {
-  key: string;
+  _id?: string;          // présent quand on lit depuis l’API
   name: string;
   order?: number;
   color?: string;
+  allowedRoles?: string[]; // ObjectIds des rôles
 };
 
 export type MeasurementTypeDto = {
@@ -48,13 +49,13 @@ export const listMeasurementTypesApi = async (p?: {
 export const createMeasurementTypeApi = async (data: {
   key: string;
   name: string;
-  stages?: StageTemplate[];
+  stages?: Omit<StageTemplate, "_id">[]; // name, color?, order?, allowedRoles?
 }) => privateRequest(TypeMethod.POST, "measurementtype", data);
 
 // Mise à jour
 export const updateMeasurementTypeApi = async (
   id: string,
-  data: Partial<{ name: string; stages: StageTemplate[] }>
+  data: Partial<{ name: string; stages: StageTemplate[] }> // pour update on peut inclure _id par étape
 ) => privateRequest(TypeMethod.PUT, `measurementtype/${id}`, data);
 
 // Suppression
@@ -62,14 +63,27 @@ export const deleteMeasurementTypeApi = async (id: string) =>
   privateRequest(TypeMethod.DELETE, `measurementtype/${id}`);
 
 // Stages ciblés
-export const addStageApi = async (id: string, stage: StageTemplate) =>
-  privateRequest(TypeMethod.POST, `measurementtype/${id}/stages`, { stage });
+export const addStageApi = async (
+  id: string,
+  stage: Omit<StageTemplate, "_id">
+) =>
+  privateRequest(TypeMethod.POST, `measurementtype/${id}/stages`, {
+    stage, // { name, color?, order?, allowedRoles? }
+  });
 
 export const updateStageApi = async (
   id: string,
-  stageKey: string,
-  data: Partial<StageTemplate>
-) => privateRequest(TypeMethod.PUT, `measurementtype/${id}/stages/${stageKey}`, data);
+  stageId: string,
+  data: Partial<Omit<StageTemplate, "_id">>
+) =>
+  privateRequest(
+    TypeMethod.PUT,
+    `measurementtype/${id}/stages/${stageId}`,
+    data
+  );
 
-export const removeStageApi = async (id: string, stageKey: string) =>
-  privateRequest(TypeMethod.DELETE, `measurementtype/${id}/stages/${stageKey}`);
+export const removeStageApi = async (id: string, stageId: string, force = false) =>
+  privateRequest(
+    TypeMethod.DELETE,
+    `measurementtype/${id}/stages/${stageId}${force ? "?force=true" : ""}`
+  );

@@ -33,9 +33,14 @@ import { STATUS_COLORS, Gradients, getFill } from "./theme";
 
 type Props = {
   cases: CaseItem[];
-  mode: PeriodMode;     // "monthly" | "yearly" | "range"
-  dateFrom: string;     // YYYY-MM-DD
-  dateTo: string;       // YYYY-MM-DD
+  mode: PeriodMode; // "monthly" | "yearly" | "range"
+  dateFrom: string; // YYYY-MM-DD
+  dateTo: string; // YYYY-MM-DD
+
+  // ⬇️ optionnel: mêmes filtres que la liste
+  delivery?: "all" | "pending" | "scheduled" | "delivered" | "received";
+  doctorId?: string | null;
+  patientId?: string | null;
 };
 
 const nf = new Intl.NumberFormat("fr-FR");
@@ -51,17 +56,28 @@ const formatPeriod = (p: string) => {
   return p;
 };
 
-const EmptyBlock: React.FC<{ label?: string }> = ({ label = "Aucune donnée sur la période" }) => (
-  <div className="h-64 grid place-items-center text-sm text-gray-500">{label}</div>
+const EmptyBlock: React.FC<{ label?: string }> = ({
+  label = "Aucune donnée sur la période",
+}) => (
+  <div className="h-64 grid place-items-center text-sm text-gray-500">
+    {label}
+  </div>
 );
 
-const KPI: React.FC<{ icon: React.ReactNode; label: string; value: number | string; accent?: string; }> =
-({ icon, label, value, accent }) => (
+const KPI: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
+  accent?: string;
+}> = ({ icon, label, value, accent }) => (
   <div className="rounded-2xl border bg-white p-4 shadow-sm">
     <div className="flex items-center justify-between">
       <div>
         <div className="text-xs text-gray-500">{label}</div>
-        <div className="mt-1 text-2xl font-semibold" style={accent ? { color: accent } : undefined}>
+        <div
+          className="mt-1 text-2xl font-semibold"
+          style={accent ? { color: accent } : undefined}
+        >
           {typeof value === "number" ? nf.format(value) : value}
         </div>
       </div>
@@ -89,16 +105,25 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
       color: pickColor(p.dataKey),
     }));
 
-  const total = rows.reduce((s: number, r: any) => s + (Number(r.value) || 0), 0);
+  const total = rows.reduce(
+    (s: number, r: any) => s + (Number(r.value) || 0),
+    0
+  );
 
   return (
     <div className="rounded-xl border bg-white p-3 shadow">
       <div className="text-xs text-gray-500 mb-1">{formatPeriod(label)}</div>
       <div className="space-y-1">
         {rows.map((r: any, i: number) => (
-          <div key={i} className="flex items-center justify-between gap-4 text-sm">
+          <div
+            key={i}
+            className="flex items-center justify-between gap-4 text-sm"
+          >
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: r.color }} />
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ background: r.color }}
+              />
               {r.name}
             </div>
             <div className="font-medium">{nf.format(r.value)}</div>
@@ -113,30 +138,133 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
   );
 };
 
-const CasesStats: React.FC<Props> = ({ cases, mode, dateFrom, dateTo }) => {
-  const series = useMemo(
-    () => (mode === "yearly" ? aggregateCasesByYear(cases, dateFrom, dateTo) : aggregateCasesByMonth(cases, dateFrom, dateTo)),
-    [cases, dateFrom, dateTo, mode]
+const CasesStats: React.FC<Props> = ({
+  cases,
+  mode,
+  dateFrom,
+  dateTo,
+  delivery = "all",
+  doctorId = null,
+  patientId = null,
+}) => {
+  // ⬇️ Construire un objet filtres une seule fois
+  const filters = useMemo(
+    () => ({
+      delivery,
+      doctorId,
+      patientId,
+    }),
+    [delivery, doctorId, patientId]
   );
 
-  const kpi = useMemo(() => kpisForRange(cases, dateFrom, dateTo), [cases, dateFrom, dateTo]);
+  // ⬇️ Agrégations: on applique date + doctor/patient (delivery="all" pour garder les 3 séries)
+  const series = useMemo(() => {
+    return mode === "yearly"
+      ? aggregateCasesByYear(cases, dateFrom, dateTo, { doctorId, patientId })
+      : aggregateCasesByMonth(cases, dateFrom, dateTo, { doctorId, patientId });
+  }, [cases, dateFrom, dateTo, mode, doctorId, patientId]);
+
+  // ⬇️ KPIs: on applique TOUT (date + delivery + doctor + patient)
+  const kpi = useMemo(
+    () => kpisForRange(cases, dateFrom, dateTo, filters),
+    [cases, dateFrom, dateTo, filters]
+  );
 
   const hasAny = (series?.length ?? 0) > 0 && (kpi.total ?? 0) > 0;
 
+  // -- helpers d'affichage période dans l'entête --
+  const fmtDate = (s?: string) => {
+    if (!s) return "—";
+    const d = new Date(s);
+    return isNaN(d.getTime())
+      ? s
+      : d.toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+  };
+  const formatPeriodRangeHeader = (from?: string, to?: string) =>
+    `${fmtDate(from)} → ${fmtDate(to)}`;
+
+  // ✅ tu avais oublié ce `return` !
   return (
     <div className="space-y-4">
       {/* KPIs */}
+      {/* Header — Statistiques Dossiers */}
+      <header className="relative overflow-hidden rounded-2xl border bg-white/80 dark:bg-slate-900/40 backdrop-blur p-5 shadow-sm">
+        {/* Décor subtil */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-500/10 dark:to-indigo-300/10 blur-2xl" />
+        <div className="pointer-events-none absolute -left-12 -bottom-12 h-44 w-44 rounded-full bg-gradient-to-tr from-cyan-100 to-cyan-200 dark:from-cyan-500/10 dark:to-cyan-300/10 blur-2xl" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          {/* Titre + sous-titre */}
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-xl grid place-items-center bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+              <FiClipboard className="text-xl" />
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-gray-500">
+                Statistiques
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold leading-tight">
+                Dossiers
+              </h2>
+              <p className="mt-1 text-xs text-gray-500">
+                Période&nbsp;: {formatPeriodRangeHeader(dateFrom, dateTo)} •
+                Vue&nbsp;: {mode === "yearly" ? "Annuel" : "Mensuel"}
+              </p>
+            </div>
+          </div>
+
+          {/* Badges rapides */}
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200">
+              Total&nbsp;: {nf.format(kpi.total)}
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
+              {mode === "yearly" ? "Année" : "Mois"}
+            </span>
+          </div>
+        </div>
+      </header>
+
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <KPI icon={<FiClipboard />}   label="Total"     value={kpi.total} />
-        <KPI icon={<FiClock />}       label="En attente" value={kpi.pending}   accent={STATUS_COLORS.pending.main} />
-        <KPI icon={<FiTruck />}       label="Prêts"      value={kpi.ready}     accent={STATUS_COLORS.ready.main} />
-        <KPI icon={<FiCheckCircle />} label="Livrés"     value={kpi.completed} accent={STATUS_COLORS.completed.main} />
-        <KPI icon={<FiUserCheck />}   label="Reçus"      value={kpi.received}  accent={STATUS_COLORS.received.main} />
+        <KPI icon={<FiClipboard />} label="Total" value={kpi.total} />
+        <KPI
+          icon={<FiClock />}
+          label="En attente"
+          value={kpi.pending}
+          accent={STATUS_COLORS.pending.main}
+        />
+        <KPI
+          icon={<FiTruck />}
+          label="Prêts"
+          value={kpi.ready}
+          accent={STATUS_COLORS.ready.main}
+        />
+        <KPI
+          icon={<FiCheckCircle />}
+          label="Livrés"
+          value={kpi.delivered}
+          accent={STATUS_COLORS.delivered.main}
+        />
+        <KPI
+          icon={<FiUserCheck />}
+          label="Reçus"
+          value={kpi.received}
+          accent={STATUS_COLORS.received.main}
+        />
       </div>
 
       {/* Charts */}
       <div className="grid md:grid-cols-2 gap-4">
-        <ChartCard title="Par période" subtitle={mode === "yearly" ? "Regroupé par année" : "Regroupé par mois"}>
+        <ChartCard
+          title="Par période"
+          subtitle={
+            mode === "yearly" ? "Regroupé par année" : "Regroupé par mois"
+          }
+        >
           {!hasAny ? (
             <EmptyBlock />
           ) : (
@@ -145,14 +273,38 @@ const CasesStats: React.FC<Props> = ({ cases, mode, dateFrom, dateTo }) => {
                 <BarChart data={series}>
                   <Gradients idPrefix="cases" />
                   <CartesianGrid stroke={STATUS_COLORS.grid} />
-                  <XAxis dataKey="period" tickFormatter={formatPeriod} tick={{ fontSize: 12 }} interval="preserveEnd" />
+                  <XAxis
+                    dataKey="period"
+                    tickFormatter={formatPeriod}
+                    tick={{ fontSize: 12 }}
+                    interval="preserveEnd"
+                  />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Bar dataKey="pending"   stackId="status" name="En attente" fill={getFill("cases","pending")} />
-                  <Bar dataKey="ready"     stackId="status" name="Prêts"      fill={getFill("cases","ready")} />
-                  <Bar dataKey="completed" stackId="status" name="Livrés"     fill={getFill("cases","completed")} />
-                  <Bar dataKey="received"                  name="Reçus"      fill={getFill("cases","received")} />
+                  <Bar
+                    dataKey="pending"
+                    stackId="status"
+                    name="En attente"
+                    fill={getFill("cases", "pending")}
+                  />
+                  <Bar
+                    dataKey="ready"
+                    stackId="status"
+                    name="Prêts"
+                    fill={getFill("cases", "ready")}
+                  />
+                  <Bar
+                    dataKey="delivered"
+                    stackId="status"
+                    name="Livrés"
+                    fill={getFill("cases", "delivered")}
+                  />
+                  <Bar
+                    dataKey="received"
+                    name="Reçus"
+                    fill={getFill("cases", "received")}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -167,7 +319,12 @@ const CasesStats: React.FC<Props> = ({ cases, mode, dateFrom, dateTo }) => {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={series}>
                   <CartesianGrid stroke={STATUS_COLORS.grid} vertical={false} />
-                  <XAxis dataKey="period" tickFormatter={formatPeriod} tick={{ fontSize: 12 }} interval="preserveEnd" />
+                  <XAxis
+                    dataKey="period"
+                    tickFormatter={formatPeriod}
+                    tick={{ fontSize: 12 }}
+                    interval="preserveEnd"
+                  />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
@@ -187,20 +344,26 @@ const CasesStats: React.FC<Props> = ({ cases, mode, dateFrom, dateTo }) => {
         </ChartCard>
       </div>
 
-      <ChartCard title="Répartition sur la période" subtitle="Diagramme rond (statuts & reçus)">
+      <ChartCard
+        title="Répartition sur la période"
+        subtitle="Diagramme rond (statuts & reçus)"
+      >
         {!hasAny ? (
           <EmptyBlock />
         ) : (
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Tooltip formatter={(v: any) => nf.format(v as number)} labelFormatter={() => "Répartition"} />
+                <Tooltip
+                  formatter={(v: any) => nf.format(v as number)}
+                  labelFormatter={() => "Répartition"}
+                />
                 <Pie
                   data={[
                     { name: "En attente", value: kpi.pending },
-                    { name: "Prêts",      value: kpi.ready },
-                    { name: "Livrés",     value: kpi.completed },
-                    { name: "Reçus",      value: kpi.received },
+                    { name: "Prêts", value: kpi.ready },
+                    { name: "Livrés", value: kpi.delivered },
+                    { name: "Reçus", value: kpi.received },
                   ]}
                   dataKey="value"
                   nameKey="name"
@@ -209,17 +372,23 @@ const CasesStats: React.FC<Props> = ({ cases, mode, dateFrom, dateTo }) => {
                   paddingAngle={3}
                   labelLine={false}
                   label={(d: any) => {
-                    const tot = (kpi.pending + kpi.ready + kpi.completed + kpi.received) || 1;
+                    const tot =
+                      kpi.pending + kpi.ready + kpi.delivered + kpi.received ||
+                      1;
                     const pct = Math.round((d.value * 100) / tot);
                     return pct >= 6 ? `${pct}%` : "";
                   }}
                 >
                   <Cell fill={STATUS_COLORS.pending.main} />
                   <Cell fill={STATUS_COLORS.ready.main} />
-                  <Cell fill={STATUS_COLORS.completed.main} />
+                  <Cell fill={STATUS_COLORS.delivered.main} />
                   <Cell fill={STATUS_COLORS.received.main} />
                 </Pie>
-                <Legend verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: 8 }} />
+                <Legend
+                  verticalAlign="bottom"
+                  align="center"
+                  wrapperStyle={{ paddingTop: 8 }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

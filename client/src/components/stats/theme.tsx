@@ -1,24 +1,34 @@
 // src/components/stats/theme.tsx
 import React from "react";
 
-export type StatusKey = "pending" | "ready" | "completed" | "received";
+// 🔁 Nouveau set exclusif
+export type StatusKey = "pending" | "ready" | "delivered" | "received";
 
+// (option) alias thème legacy
+export const THEME_ALIAS = { completed: "delivered" as const };
+
+// Palette (completed → delivered)
 export const STATUS_COLORS: Record<
   StatusKey | "grid" | "muted",
   { main: string; light?: string } | any
 > = {
   pending:   { main: "#f59e0b", light: "#fde68a" }, // amber
   ready:     { main: "#0ea5e9", light: "#bae6fd" }, // sky
-  completed: { main: "#6366f1", light: "#c7d2fe" }, // indigo
+  delivered: { main: "#6366f1", light: "#c7d2fe" }, // indigo
   received:  { main: "#10b981", light: "#a7f3d0" }, // emerald
   grid:      "#e5e7eb",
   muted:     "#6b7280",
 };
 
-export const getFill = (prefix: string, key: StatusKey) => `url(#${prefix}-${key})`;
+// 🔀 Tolère encore "completed" en entrée et mappe vers "delivered"
+const normalizeThemeKey = (k: StatusKey | "completed"): StatusKey =>
+  k === "completed" ? "delivered" : k;
+
+export const getFill = (prefix: string, key: StatusKey | "completed") =>
+  `url(#${prefix}-${normalizeThemeKey(key)})`;
 
 export const Gradients: React.FC<{ idPrefix: string }> = ({ idPrefix }) => {
-  const keys: StatusKey[] = ["pending", "ready", "completed", "received"];
+  const keys: StatusKey[] = ["pending", "ready", "delivered", "received"];
   return (
     <defs>
       {keys.map((k) => (
