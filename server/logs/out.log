@@ -10437,3 +10437,11 @@
 2025-10-08T22:56:11: 261df22f-7073-47de-a5ad-47079256cffd GET /api/ping 404 21 - 2.655 ms
 2025-10-08T22:56:35: 864c4211-b4d1-4f41-b151-16732f022bcd POST /api/auth/login 300 41 - 49.283 ms
 2025-10-08T22:57:12: cb9e97a7-5adc-4186-a716-5f02931d39b9 POST /api/auth/login 200 7333 - 195.362 ms
+2025-10-08T23:21:09: f312c8e9-74c0-4f69-bd6f-428894c4efc7 OPTIONS /api/auth/login - - - - ms
+2025-10-08T23:21:09: 64aff872-e5e9-46e2-a54a-0026c371873d OPTIONS /api/settings/general - - - - ms
+2025-10-08T23:21:09: 313a0b10-a437-4640-8709-c2be27d46f2e OPTIONS /api/settings/general - - - - ms
+2025-10-08T23:21:09: 99446ad4-8b15-4006-a0a7-8ae7b09c974d OPTIONS /api/auth/login - - - - ms
+2025-10-08T23:21:09: e391e283-8df2-4b48-ba4c-b0aef0843539 OPTIONS /api/settings/general - - - - ms
+2025-10-08T23:21:09: 6d14780a-f951-4bc9-8ec0-ea965fd1428f OPTIONS /api/settings/general - - - - ms
+2025-10-08T23:34:46: 🔗 Mongo connection established
+2025-10-08T23:34:46: 🔁 Mongo reconnected

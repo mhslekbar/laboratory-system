@@ -7,3 +7,24 @@
 2025-10-08T03:23:27: [static] Uploads directory missing: C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\dist\public\uploads
 2025-10-08T22:25:29: [static] Public directory missing: C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\dist\public
 2025-10-08T22:25:29: [static] Uploads directory missing: C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\dist\public\uploads
+2025-10-08T22:55:42: ValidationError: The Express 'trust proxy' setting is true, which allows anyone to trivially bypass IP-based rate limiting. See https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/ for more information.
+2025-10-08T22:55:42:     at Object.trustProxy (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:348:13)
+2025-10-08T22:55:42:     at Object.wrappedValidations.<computed> [as trustProxy] (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:638:22)
+2025-10-08T22:55:42:     at Object.keyGenerator (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:739:20)
+2025-10-08T22:55:42:     at C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:801:32
+2025-10-08T22:55:42:     at processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-10-08T22:55:42:     at Object.baseLimiter (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:782:5) {
+2025-10-08T22:55:42:   code: 'ERR_ERL_PERMISSIVE_TRUST_PROXY',
+2025-10-08T22:55:42:   help: 'https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/'
+2025-10-08T22:55:42: }
+2025-10-08T22:56:11: ValidationError: The Express 'trust proxy' setting is true, which allows anyone to trivially bypass IP-based rate limiting. See https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/ for more information.
+2025-10-08T22:56:11:     at Object.trustProxy (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:348:13)
+2025-10-08T22:56:11:     at Object.wrappedValidations.<computed> [as trustProxy] (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:638:22)
+2025-10-08T22:56:11:     at Object.keyGenerator (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:739:20)
+2025-10-08T22:56:11:     at C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:801:32
+2025-10-08T22:56:11:     at processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-10-08T22:56:11:     at Object.lightLimiter (C:\Users\INFOTELEC\Desktop\mern-projects\laboratory-system\server\node_modules\express-rate-limit\dist\index.cjs:782:5) {
+2025-10-08T22:56:11:   code: 'ERR_ERL_PERMISSIVE_TRUST_PROXY',
+2025-10-08T22:56:11:   help: 'https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/'
+2025-10-08T22:56:11: }
+2025-10-08T23:34:36: ⚠️  Mongo disconnected
