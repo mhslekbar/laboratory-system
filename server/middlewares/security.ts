@@ -28,8 +28,11 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "")
 
 // Always include localhost for dev
 const defaultOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
+  "http://localhost:3051",
+  "http://127.0.0.1:3051",
+  "https://medepratlab.com",
+  "https://www.medepratlab.com",
+  "https://api.medepratlab.com",
 ];
 
 const origins = [...new Set([...defaultOrigins, ...allowedOrigins])];
@@ -87,8 +90,8 @@ const lightLimiter = rateLimit({
    Security middleware stack
 ================================ */
 export function securityMiddlewares() {
-  console.log("origins: ", origins);
-  console.log("process.env.CORS_ORIGIN: ", process.env.CORS_ORIGIN);
+  // console.log("origins: ", origins);
+  // console.log("process.env.CORS_ORIGIN: ", process.env.CORS_ORIGIN);
   return [
     helmet({ crossOriginResourcePolicy: false }),
     cors(corsOptions),
