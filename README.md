@@ -73,6 +73,7 @@
   <!-- mkdir /var/www/medepratlab/client -->
   <!-- rm -rf /var/www/cdghazaly/* && mkdir /var/www/cdghazaly/client && cp -r build/* /var/www/cdghazaly/client -->
   <!-- rm -rf /var/www/cabinetibtissama/* && mkdir /var/www/cabinetibtissama/client && cp -r build/* /var/www/cabinetibtissama/client -->
+  
   rm -rf /var/www/medepratlab/* && mkdir /var/www/medepratlab/client && cp -r build/* /var/www/medepratlab/client
   
   ##### END to do this for best one

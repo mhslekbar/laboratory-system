@@ -52,7 +52,7 @@ export const env = {
   JWT_SEC: get("JWT_SEC", "")!,
   JWT_REFRESH_SEC: get("JWT_REFRESH_SEC", "")!,
 
-  CORS_ORIGIN_LIST: splitCSV(get("CORS_ORIGIN", "")),
+  CORS_ORIGIN_LIST: splitCSV(get("CORS_ORIGIN", "")), // "https://medepratlab.com,https://www.medepratlab.com"
 
   // Static paths
   ROOT_DIR: ROOT_DIR!,

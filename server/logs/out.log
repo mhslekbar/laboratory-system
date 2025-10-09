@@ -10445,3 +10445,6 @@
 2025-10-08T23:21:09: 6d14780a-f951-4bc9-8ec0-ea965fd1428f OPTIONS /api/settings/general - - - - ms
 2025-10-08T23:34:46: 🔗 Mongo connection established
 2025-10-08T23:34:46: 🔁 Mongo reconnected
+2025-10-08T23:58:12: ✅ Mongo connected (db: lab_system)
+2025-10-08T23:58:12: Running in development mode
+2025-10-08T23:58:12: 🚀 API listening on http://localhost:3062 (env=development)
